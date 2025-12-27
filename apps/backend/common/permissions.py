@@ -28,3 +28,21 @@ class IsAdmin(permissions.BasePermission):
             and request.user.is_staff
         )
 
+
+class IsHROrAdmin(permissions.BasePermission):
+    """Only allow HR users or system admins."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and (request.user.is_staff or self._is_hr_user(request.user))
+        )
+
+    @staticmethod
+    def _is_hr_user(user):
+        """Check if user is an HR user. TODO: Implement role-based access control."""
+        # For now, check if user is staff
+        # This should be updated once role system is implemented
+        return user.is_staff
+

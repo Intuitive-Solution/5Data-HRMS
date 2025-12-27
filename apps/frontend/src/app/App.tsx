@@ -9,6 +9,9 @@ import MainLayout from '@/layouts/MainLayout'
 // Pages
 import LoginPage from '@/modules/auth/pages/LoginPage'
 import DashboardPage from '@/modules/dashboard/pages/DashboardPage'
+import EmployeeListPage from '@/modules/employees/pages/EmployeeListPage'
+import EmployeeDetailPage from '@/modules/employees/pages/EmployeeDetailPage'
+import EmployeeCreatePage from '@/modules/employees/pages/EmployeeCreatePage'
 
 export default function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth)
@@ -24,7 +27,11 @@ export default function App() {
         {/* Protected Routes */}
         <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />}>
           <Route path="/" element={<DashboardPage />} />
-          {/* Additional routes will be added here */}
+          
+          {/* Employee Routes */}
+          <Route path="/employees" element={<EmployeeListPage />} />
+          <Route path="/employees/new" element={<EmployeeCreatePage />} />
+          <Route path="/employees/:id" element={<EmployeeDetailPage />} />
         </Route>
 
         {/* Fallback */}
