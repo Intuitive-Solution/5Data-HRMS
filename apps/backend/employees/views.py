@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.filters import OrderingFilter, SearchFilter
 from django.contrib.auth import get_user_model
 from .models import Employee, EmployeeDocument
 from .serializers import (
@@ -22,8 +23,19 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     permission_classes = [IsAuthenticated]
-    search_fields = ['employee_id', 'user__email', 'user__first_name', 'user__last_name']
-    ordering_fields = ['employee_id', 'date_of_joining', 'employment_status']
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['employee_id', 'user__email', 'user__first_name', 'user__last_name', 'department', 'job_title']
+    ordering_fields = [
+        'employee_id', 
+        'user__first_name', 
+        'user__last_name',
+        'department', 
+        'job_title',
+        'employment_status',
+        'date_of_joining',
+        'employment_type',
+        'created_at'
+    ]
     ordering = ['employee_id']
 
     def get_serializer_class(self):

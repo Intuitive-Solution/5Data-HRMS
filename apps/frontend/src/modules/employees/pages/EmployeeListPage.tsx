@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
@@ -8,6 +8,8 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
+  EllipsisVerticalIcon,
+  ChevronUpDownIcon,
 } from '@heroicons/react/24/outline'
 import { useEmployees, useDeleteEmployee } from '../hooks/useEmployees'
 import type { Employee } from '@5data-hrms/shared'
@@ -17,8 +19,27 @@ export default function EmployeeListPage() {
   const { user } = useSelector((state: RootState) => state.auth)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [ordering, setOrdering] = useState('employee_id')
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null)
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const menuRef = useRef<HTMLDivElement>(null)
 
-  const { data, isLoading, error } = useEmployees(page, search)
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null)
+      }
+    }
+
+    if (openMenuId) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openMenuId])
+
+  const { data, isLoading, error } = useEmployees(page, search, ordering)
   const deleteEmployee = useDeleteEmployee()
 
   // Check if user has HR/Admin role
@@ -40,6 +61,43 @@ export default function EmployeeListPage() {
 
   const handleCreateNew = () => {
     navigate('/employees/new')
+  }
+
+  const handleMenuClick = (employeeId: string, buttonRef: HTMLButtonElement | null) => {
+    if (openMenuId === employeeId) {
+      setOpenMenuId(null)
+    } else {
+      setOpenMenuId(employeeId)
+      if (buttonRef) {
+        const rect = buttonRef.getBoundingClientRect()
+        setMenuPosition({
+          top: rect.bottom + 8,
+          left: rect.left - 160, // w-40 = 160px, align right
+        })
+      }
+    }
+  }
+
+  const handleSort = (field: string) => {
+    setPage(1) // Reset to page 1 when sorting
+    if (ordering === field) {
+      // If clicking same field, reverse the order
+      setOrdering(`-${field}`)
+    } else if (ordering === `-${field}`) {
+      // If clicking descending field, go back to ascending
+      setOrdering(field)
+    } else {
+      // Click a new field
+      setOrdering(field)
+    }
+  }
+
+  const isSorted = (field: string) => {
+    return ordering === field || ordering === `-${field}`
+  }
+
+  const isSortedDesc = (field: string) => {
+    return ordering === `-${field}`
   }
 
   if (error) {
@@ -89,7 +147,7 @@ export default function EmployeeListPage() {
       </div>
 
       {/* Table */}
-      <div className="card overflow-hidden">
+      <div className="card">
         {isLoading ? (
           <div className="text-center py-12">
             <p className="text-text-secondary">Loading employees...</p>
@@ -99,24 +157,69 @@ export default function EmployeeListPage() {
             <p className="text-text-secondary">No employees found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-visible">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-divider bg-surface">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Employee ID
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('employee_id')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Employee ID</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('employee_id') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('employee_id') && (
+                        <span className="text-xs">{isSortedDesc('employee_id') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Name
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('user__first_name')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Name</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('user__first_name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('user__first_name') && (
+                        <span className="text-xs">{isSortedDesc('user__first_name') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Department
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('department')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Department</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('department') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('department') && (
+                        <span className="text-xs">{isSortedDesc('department') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Job Title
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('job_title')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Job Title</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('job_title') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('job_title') && (
+                        <span className="text-xs">{isSortedDesc('job_title') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Status
+                  <th 
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('employment_status')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Status</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('employment_status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('employment_status') && (
+                        <span className="text-xs">{isSortedDesc('employment_status') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
                     Actions
@@ -168,32 +271,17 @@ export default function EmployeeListPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <div className="flex items-center gap-2">
+                      <div>
                         <button
-                          onClick={() => handleView(employee.id)}
+                          ref={(el) => {
+                            if (el) buttonRefs.current[employee.id] = el
+                          }}
+                          onClick={() => handleMenuClick(employee.id, buttonRefs.current[employee.id])}
                           className="p-2 hover:bg-surface rounded-card transition-colors"
-                          title="View"
+                          title="More options"
                         >
-                          <EyeIcon className="w-4 h-4 text-primary" />
+                          <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
                         </button>
-                        {isHROrAdmin && (
-                          <>
-                            <button
-                              onClick={() => handleEdit(employee.id)}
-                              className="p-2 hover:bg-surface rounded-card transition-colors"
-                              title="Edit"
-                            >
-                              <PencilIcon className="w-4 h-4 text-primary" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(employee.id)}
-                              className="p-2 hover:bg-surface rounded-card transition-colors"
-                              title="Delete"
-                            >
-                              <TrashIcon className="w-4 h-4 text-red-500" />
-                            </button>
-                          </>
-                        )}
                       </div>
                     </td>
                   </tr>
@@ -228,6 +316,53 @@ export default function EmployeeListPage() {
               Next
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Fixed Position Dropdown Menu */}
+      {openMenuId && menuPosition && (
+        <div
+          ref={menuRef}
+          className="fixed w-40 bg-white border border-divider rounded-lg shadow-xl z-50"
+          style={{
+            top: `${menuPosition.top}px`,
+            left: `${menuPosition.left}px`,
+          }}
+        >
+          <button
+            onClick={() => {
+              handleView(openMenuId)
+              setOpenMenuId(null)
+            }}
+            className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3 text-text-primary"
+          >
+            <EyeIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm">View</span>
+          </button>
+          {isHROrAdmin && (
+            <>
+              <button
+                onClick={() => {
+                  handleEdit(openMenuId)
+                  setOpenMenuId(null)
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3 text-text-primary border-t border-divider"
+              >
+                <PencilIcon className="w-4 h-4 text-primary" />
+                <span className="text-sm">Edit</span>
+              </button>
+              <button
+                onClick={() => {
+                  handleDelete(openMenuId)
+                  setOpenMenuId(null)
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors flex items-center gap-3 text-red-600 border-t border-divider"
+              >
+                <TrashIcon className="w-4 h-4 text-red-500" />
+                <span className="text-sm">Delete</span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
