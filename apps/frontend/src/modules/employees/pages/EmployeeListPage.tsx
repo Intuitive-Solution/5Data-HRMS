@@ -133,7 +133,20 @@ export default function EmployeeListPage() {
                       {employee.employee_id}
                     </td>
                     <td className="px-6 py-4 text-sm text-text-primary">
-                      {employee.user?.first_name} {employee.user?.last_name}
+                      <div className="flex items-center gap-3">
+                        {employee.picture ? (
+                          <img
+                            src={employee.picture}
+                            alt={`${employee.user?.first_name} ${employee.user?.last_name}`}
+                            className="w-10 h-10 rounded-full object-cover border border-divider flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                            {employee.user?.first_name?.charAt(0)}{employee.user?.last_name?.charAt(0)}
+                          </div>
+                        )}
+                        <span>{employee.user?.first_name} {employee.user?.last_name}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
                       {employee.department}
