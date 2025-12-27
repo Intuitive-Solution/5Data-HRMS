@@ -1,0 +1,19 @@
+{
+  "name": "@5data-hrms/shared",
+  "version": "1.0.0",
+  "description": "Shared types, constants, and utilities for HRMS",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
+

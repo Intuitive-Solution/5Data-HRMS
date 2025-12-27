@@ -1,0 +1,21 @@
+{
+  "name": "5data-hrms",
+  "version": "1.0.0",
+  "description": "Production-grade Enterprise HRMS & Timesheet System",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r --parallel build",
+    "lint": "pnpm -r --parallel lint",
+    "type-check": "pnpm -r --parallel type-check",
+    "test": "pnpm -r --parallel test",
+    "frontend:dev": "pnpm --filter frontend dev",
+    "frontend:build": "pnpm --filter frontend build",
+    "backend:migrate": "pnpm --filter backend migrate",
+    "backend:dev": "pnpm --filter backend dev",
+    "setup": "pnpm install && pnpm -r setup"
+  },
+  "devDependencies": {}
+}
+

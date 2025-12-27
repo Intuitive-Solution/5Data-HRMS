@@ -1,0 +1,14 @@
+"""
+Leave URLs.
+"""
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import LeaveViewSet
+
+router = DefaultRouter()
+router.register('', LeaveViewSet, basename='leave')
+
+urlpatterns = [
+    path('', include(router.urls)),
+]
+
