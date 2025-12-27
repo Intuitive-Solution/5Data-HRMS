@@ -41,8 +41,10 @@ class AuthViewSet(viewsets.ViewSet):
         )
 
         response_data = {
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
+            'tokens': {
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            },
             'user': UserSerializer(user).data,
         }
 

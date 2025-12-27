@@ -112,6 +112,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# URL Configuration
+APPEND_SLASH = False  # Disable trailing slash redirect for REST API endpoints
+
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'

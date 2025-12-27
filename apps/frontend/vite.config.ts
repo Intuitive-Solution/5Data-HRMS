@@ -19,7 +19,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@5data-hrms/shared': path.resolve(__dirname, '../../packages/shared/src'),
     }
+  },
+  optimizeDeps: {
+    exclude: ['@5data-hrms/shared']
   }
 })
 

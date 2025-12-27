@@ -22,7 +22,7 @@ export default function LoginPage() {
     dispatch(setLoading(true))
 
     try {
-      const response = await api.post<LoginResponse>('/auth/login', {
+      const response = await api.post<LoginResponse>('/auth/login/', {
         email,
         password,
       })

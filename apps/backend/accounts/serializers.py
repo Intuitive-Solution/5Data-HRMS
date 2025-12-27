@@ -10,10 +10,17 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     """User serializer."""
+    roles = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'is_active')
+        fields = ('id', 'email', 'first_name', 'last_name', 'is_active', 'roles')
         read_only_fields = ('id',)
+    
+    def get_roles(self, obj):
+        """Get user roles. TODO: Implement role assignment system."""
+        # For now, return empty list. Roles will be implemented later.
+        return []
 
 
 class LoginSerializer(serializers.Serializer):

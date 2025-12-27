@@ -3,7 +3,9 @@
  */
 
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Note: Vite will replace import.meta.env.VITE_API_BASE_URL at build time
+// For development, this defaults to localhost:8000
+export const API_BASE_URL = (import.meta as any)?.env?.VITE_API_BASE_URL || 'http://localhost:8000';
 export const API_VERSION = 'v1';
 export const API_URL = `${API_BASE_URL}/api/${API_VERSION}`;
 
