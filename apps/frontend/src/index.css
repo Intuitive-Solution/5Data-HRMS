@@ -60,5 +60,14 @@
   .badge-secondary {
     @apply badge bg-surface text-text-primary;
   }
+
+  .overflow-y-auto::-webkit-scrollbar {
+    display: none;
+  }
+
+  .overflow-y-auto {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 

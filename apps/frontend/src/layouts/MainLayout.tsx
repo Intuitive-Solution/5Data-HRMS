@@ -4,7 +4,7 @@ import Header from '@/components/layout/Header'
 
 export default function MainLayout() {
   return (
-    <div className="flex h-screen bg-surface">
+    <div className="flex bg-surface w-full h-full overflow-hidden">
       {/* Sidebar */}
       <Sidebar />
 
