@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { EmployeeDetail, UpdateEmployeeRequest } from '@5data-hrms/shared'
+import ManagerSelect from './ManagerSelect'
 
 interface JobInfoTabProps {
   employee: EmployeeDetail
@@ -23,6 +24,10 @@ export default function JobInfoTab({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleManagerChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, reporting_manager: value }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,19 +77,11 @@ export default function JobInfoTab({
             <label className="block text-sm font-medium text-text-primary mb-2">
               Reporting Manager
             </label>
-            <input
-              type="text"
-              value={
-                employee.reporting_manager
-                  ? `${employee.reporting_manager.user.first_name} ${employee.reporting_manager.user.last_name}`
-                  : 'N/A'
-              }
-              disabled
-              className="input-field bg-surface opacity-50 cursor-not-allowed"
+            <ManagerSelect
+              value={formData.reporting_manager}
+              onChange={handleManagerChange}
+              excludeEmployeeId={employee.id}
             />
-            <p className="text-text-secondary text-xs mt-2">
-              TODO: Implement manager selection dropdown
-            </p>
           </div>
         </div>
 

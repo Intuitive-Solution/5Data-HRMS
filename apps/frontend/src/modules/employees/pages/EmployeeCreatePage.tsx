@@ -4,6 +4,7 @@ import { useCreateEmployee } from '../hooks/useEmployees'
 import type { CreateEmployeeRequest } from '@5data-hrms/shared'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import RoleSelect from '../components/RoleSelect'
+import ManagerSelect from '../components/ManagerSelect'
 
 export default function EmployeeCreatePage() {
   const navigate = useNavigate()
@@ -321,11 +322,9 @@ export default function EmployeeCreatePage() {
               <label className="block text-sm font-medium text-text-primary mb-2">
                 Reporting Manager
               </label>
-              <input
-                type="text"
-                placeholder="TODO: Implement dropdown"
-                disabled
-                className="input-field bg-surface opacity-50"
+              <ManagerSelect
+                value={formData.reporting_manager_id || ''}
+                onChange={(value) => setFormData((prev) => ({ ...prev, reporting_manager_id: value || undefined }))}
               />
             </div>
 

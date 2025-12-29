@@ -32,6 +32,15 @@ export interface Employee {
   id: string;
   employee_id: string;
   
+  // User info (included in list responses from backend)
+  user?: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    is_active: boolean;
+  };
+  
   // Personal Info
   middle_name?: string;
   personal_email?: string;
