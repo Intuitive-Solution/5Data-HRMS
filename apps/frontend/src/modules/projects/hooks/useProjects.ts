@@ -177,3 +177,18 @@ export const useDeleteAssignment = (projectId: string | undefined) => {
   })
 }
 
+/**
+ * Hook to get active project count
+ * Fetches all active projects and returns the count
+ */
+export const useActiveProjectCount = () => {
+  return useQuery({
+    queryKey: [PROJECT_QUERY_KEY, 'active-count'],
+    queryFn: async () => {
+      const response = await projectApi.getProjects(1, '', 'name', 'active')
+      return response.data.count || 0
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
