@@ -230,7 +230,8 @@ export default function EmployeeListPage() {
                 {data.results.map((employee: Employee) => (
                   <tr
                     key={employee.id}
-                    className="border-b border-divider hover:bg-surface transition-colors"
+                    onClick={() => handleView(employee.id)}
+                    className="border-b border-divider hover:bg-surface transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4 text-sm text-text-primary font-medium">
                       {employee.employee_id}
@@ -276,7 +277,10 @@ export default function EmployeeListPage() {
                           ref={(el) => {
                             if (el) buttonRefs.current[employee.id] = el
                           }}
-                          onClick={() => handleMenuClick(employee.id, buttonRefs.current[employee.id])}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleMenuClick(employee.id, buttonRefs.current[employee.id])
+                          }}
                           className="p-2 hover:bg-surface rounded-card transition-colors"
                           title="More options"
                         >
