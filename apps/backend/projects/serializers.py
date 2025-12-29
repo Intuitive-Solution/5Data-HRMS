@@ -17,7 +17,11 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class ProjectAssignmentSerializer(serializers.ModelSerializer):
-    """Project assignment serializer."""
+    """Project assignment serializer.
+    
+    Returns employee and project as IDs (ForeignKey fields serialize to their PK).
+    Accepts employee and project as IDs when creating/updating.
+    """
     class Meta:
         model = ProjectAssignment
         fields = (

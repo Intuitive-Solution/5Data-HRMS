@@ -21,11 +21,13 @@ export interface Project {
 
 export interface ProjectAssignment {
   id: string;
-  employee_id: string;
-  project_id: string;
+  employee: string;
+  project: string;
   role: string;
   assigned_date: string;
   unassigned_date?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CreateProjectRequest {

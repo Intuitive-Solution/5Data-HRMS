@@ -12,6 +12,9 @@ import DashboardPage from '@/modules/dashboard/pages/DashboardPage'
 import EmployeeListPage from '@/modules/employees/pages/EmployeeListPage'
 import EmployeeDetailPage from '@/modules/employees/pages/EmployeeDetailPage'
 import EmployeeCreatePage from '@/modules/employees/pages/EmployeeCreatePage'
+import ProjectListPage from '@/modules/projects/pages/ProjectListPage'
+import ProjectDetailPage from '@/modules/projects/pages/ProjectDetailPage'
+import ProjectCreatePage from '@/modules/projects/pages/ProjectCreatePage'
 
 export default function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth)
@@ -32,6 +35,11 @@ export default function App() {
           <Route path="/employees" element={<EmployeeListPage />} />
           <Route path="/employees/new" element={<EmployeeCreatePage />} />
           <Route path="/employees/:id" element={<EmployeeDetailPage />} />
+
+          {/* Project Routes */}
+          <Route path="/projects" element={<ProjectListPage />} />
+          <Route path="/projects/new" element={<ProjectCreatePage />} />
+          <Route path="/projects/:id" element={<ProjectDetailPage />} />
         </Route>
 
         {/* Fallback */}
