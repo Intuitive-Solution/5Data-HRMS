@@ -17,9 +17,9 @@ class ProjectAdmin(BaseAdmin):
 @admin.register(ProjectAssignment)
 class ProjectAssignmentAdmin(admin.ModelAdmin):
     """Project assignment admin."""
-    list_display = ('employee', 'project', 'role', 'assigned_date')
+    list_display = ('employee', 'project', 'role', 'allocation_percentage', 'assigned_date')
     search_fields = ('employee__employee_id', 'project__name')
-    list_filter = ('assigned_date', 'project')
+    list_filter = ('role', 'assigned_date', 'project')
 
 
 

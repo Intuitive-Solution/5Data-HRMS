@@ -25,8 +25,8 @@ class ProjectAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectAssignment
         fields = (
-            'id', 'employee', 'project', 'role', 'assigned_date',
-            'unassigned_date', 'created_at', 'updated_at'
+            'id', 'employee', 'project', 'role', 'allocation_percentage',
+            'assigned_date', 'unassigned_date', 'created_at', 'updated_at'
         )
         read_only_fields = ('id', 'created_at', 'updated_at')
 

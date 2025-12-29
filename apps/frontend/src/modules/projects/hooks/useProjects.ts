@@ -120,6 +120,7 @@ export const useCreateAssignment = () => {
       employee: string
       project: string
       role: string
+      allocation_percentage: number
       assigned_date: string
     }) => projectApi.createAssignment(data).then(res => res.data),
     onSuccess: (_, variables) => {
@@ -144,6 +145,7 @@ export const useUpdateAssignment = (projectId: string | undefined) => {
       id: string
       data: {
         role?: string
+        allocation_percentage?: number
         unassigned_date?: string | null
       }
     }) => projectApi.updateAssignment(id, data).then(res => res.data),

@@ -23,7 +23,8 @@ export default function AssignmentsTab({ projectId, canEdit }: AssignmentsTabPro
   const { user } = useSelector((state: RootState) => state.auth)
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('')
-  const [role, setRole] = useState('')
+  const [role, setRole] = useState<'owner' | 'lead' | 'member'>('member')
+  const [allocationPercentage, setAllocationPercentage] = useState<number>(100)
   const [assignedDate, setAssignedDate] = useState(
     new Date().toISOString().split('T')[0]
   )
@@ -41,8 +42,13 @@ export default function AssignmentsTab({ projectId, canEdit }: AssignmentsTabPro
   const handleAddAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!selectedEmployeeId || !role.trim()) {
-      alert('Please select an employee and enter a role')
+    if (!selectedEmployeeId || !role) {
+      alert('Please select an employee and a role')
+      return
+    }
+
+    if (allocationPercentage < 0 || allocationPercentage > 100) {
+      alert('Allocation percentage must be between 0 and 100')
       return
     }
 
@@ -50,13 +56,15 @@ export default function AssignmentsTab({ projectId, canEdit }: AssignmentsTabPro
       await createAssignment.mutateAsync({
         employee: selectedEmployeeId,
         project: projectId,
-        role: role.trim(),
+        role: role,
+        allocation_percentage: allocationPercentage,
         assigned_date: assignedDate,
       })
 
       // Reset form
       setSelectedEmployeeId('')
-      setRole('')
+      setRole('member')
+      setAllocationPercentage(100)
       setAssignedDate(new Date().toISOString().split('T')[0])
       setShowAddForm(false)
     } catch (error) {
@@ -148,13 +156,34 @@ export default function AssignmentsTab({ projectId, canEdit }: AssignmentsTabPro
               <label className="block text-sm font-medium text-text-primary mb-2">
                 Role *
               </label>
-              <input
-                type="text"
+              <select
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="e.g., Developer, Designer, Project Lead"
+                onChange={(e) => setRole(e.target.value as 'owner' | 'lead' | 'member')}
+                className="input-field"
+              >
+                <option value="member">Member</option>
+                <option value="lead">Lead</option>
+                <option value="owner">Owner</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Allocation Percentage *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={allocationPercentage}
+                onChange={(e) => setAllocationPercentage(parseFloat(e.target.value) || 0)}
+                placeholder="0-100"
                 className="input-field"
               />
+              <p className="text-text-secondary text-xs mt-1">
+                Percentage of time allocated to this project (0-100)
+              </p>
             </div>
 
             <div>
@@ -172,7 +201,7 @@ export default function AssignmentsTab({ projectId, canEdit }: AssignmentsTabPro
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                disabled={createAssignment.isPending || !selectedEmployeeId}
+                disabled={createAssignment.isPending || !selectedEmployeeId || !role}
                 className="btn-primary"
               >
                 {createAssignment.isPending ? 'Adding...' : 'Add Assignment'}
@@ -242,8 +271,15 @@ export default function AssignmentsTab({ projectId, canEdit }: AssignmentsTabPro
                   <div className="flex items-center gap-8">
                     <div className="text-right">
                       <p className="text-sm text-text-secondary">Role</p>
-                      <p className="font-medium text-text-primary">
+                      <p className="font-medium text-text-primary capitalize">
                         {assignment.role}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-sm text-text-secondary">Allocation</p>
+                      <p className="font-medium text-text-primary">
+                        {assignment.allocation_percentage}%
                       </p>
                     </div>
 

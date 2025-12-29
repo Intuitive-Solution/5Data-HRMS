@@ -6,6 +6,8 @@ export type BillingType = 'time_and_material' | 'fixed_price' | 'non_billable';
 
 export type ProjectStatus = 'active' | 'paused' | 'completed' | 'cancelled';
 
+export type ProjectRole = 'owner' | 'lead' | 'member';
+
 export interface Project {
   id: string;
   name: string;
@@ -23,7 +25,8 @@ export interface ProjectAssignment {
   id: string;
   employee: string;
   project: string;
-  role: string;
+  role: ProjectRole;
+  allocation_percentage: number;
   assigned_date: string;
   unassigned_date?: string;
   created_at?: string;

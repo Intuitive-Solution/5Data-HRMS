@@ -90,6 +90,7 @@ export const projectApi = {
     employee: string
     project: string
     role: string
+    allocation_percentage: number
     assigned_date: string
   }) => {
     return api.post<ProjectAssignment>(`${ASSIGNMENT_BASE_URL}/`, data)
@@ -100,6 +101,7 @@ export const projectApi = {
    */
   updateAssignment: (id: string, data: {
     role?: string
+    allocation_percentage?: number
     unassigned_date?: string | null
   }) => {
     return api.patch<ProjectAssignment>(`${ASSIGNMENT_BASE_URL}/${id}/`, data)

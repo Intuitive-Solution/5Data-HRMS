@@ -18,6 +18,12 @@ PROJECT_STATUS_CHOICES = (
     ('cancelled', 'Cancelled'),
 )
 
+PROJECT_ROLE_CHOICES = (
+    ('owner', 'Owner'),
+    ('lead', 'Lead'),
+    ('member', 'Member'),
+)
+
 
 class Project(SoftDeleteModel):
     """Project model."""
@@ -48,7 +54,13 @@ class ProjectAssignment(models.Model):
     """Project assignment model."""
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='project_assignments')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='assignments')
-    role = models.CharField(max_length=100)
+    role = models.CharField(max_length=20, choices=PROJECT_ROLE_CHOICES, default='member')
+    allocation_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=100.00,
+        help_text='Allocation percentage (0-100)'
+    )
     assigned_date = models.DateField()
     unassigned_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
