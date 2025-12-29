@@ -12,7 +12,7 @@ from .serializers import (
     EmployeeSerializer, CreateEmployeeSerializer, 
     UpdateEmployeeSerializer, EmployeeDocumentSerializer
 )
-from common.permissions import IsHROrAdmin
+from common.permissions import IsHROrSystemAdmin
 from common.utils import AuditTrailMixin
 
 User = get_user_model()
@@ -49,7 +49,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         """Set permissions based on action."""
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsHROrAdmin]
+            permission_classes = [IsAuthenticated, IsHROrSystemAdmin]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -118,7 +118,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         except Employee.DoesNotExist:
             return Response({'detail': 'Employee profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsHROrAdmin])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsHROrSystemAdmin])
     def upload_document(self, request, pk=None):
         """Upload document for employee."""
         employee = self.get_object()
@@ -145,7 +145,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         serializer = EmployeeDocumentSerializer(documents, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['delete'], permission_classes=[IsAuthenticated, IsHROrAdmin])
+    @action(detail=True, methods=['delete'], permission_classes=[IsAuthenticated, IsHROrSystemAdmin])
     def delete_document(self, request, pk=None):
         """Delete a document."""
         employee = self.get_object()

@@ -4,6 +4,7 @@ Authentication serializers.
 from rest_framework import serializers
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Role, UserRole
 
 User = get_user_model()
 
@@ -18,9 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
     
     def get_roles(self, obj):
-        """Get user roles. TODO: Implement role assignment system."""
-        # For now, return empty list. Roles will be implemented later.
-        return []
+        """Get user roles."""
+        return obj.get_role_names()
 
 
 class LoginSerializer(serializers.Serializer):
@@ -68,4 +68,24 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data['new_password'] != data['new_password_confirm']:
             raise serializers.ValidationError('Passwords do not match.')
         return data
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    """Serializer for Role model."""
+    class Meta:
+        model = Role
+        fields = ('id', 'name', 'display_name', 'description')
+        read_only_fields = ('id',)
+
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    """Serializer for UserRole assignment."""
+    role_name = serializers.CharField(source='role.name', read_only=True)
+    role_display_name = serializers.CharField(source='role.display_name', read_only=True)
+    assigned_by_email = serializers.CharField(source='assigned_by.email', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = UserRole
+        fields = ('id', 'role', 'role_name', 'role_display_name', 'assigned_at', 'assigned_by_email')
+        read_only_fields = ('id', 'assigned_at', 'assigned_by_email')
 

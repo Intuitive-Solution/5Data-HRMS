@@ -21,3 +21,5 @@ class ProjectAssignmentAdmin(admin.ModelAdmin):
     search_fields = ('employee__employee_id', 'project__name')
     list_filter = ('assigned_date', 'project')
 
+
+

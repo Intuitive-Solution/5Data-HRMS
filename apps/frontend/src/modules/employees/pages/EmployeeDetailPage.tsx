@@ -7,12 +7,14 @@ import PersonalInfoTab from '../components/PersonalInfoTab'
 import JobInfoTab from '../components/JobInfoTab'
 import WorkInfoTab from '../components/WorkInfoTab'
 import DocumentsTab from '../components/DocumentsTab'
+import RolesTab from '../components/RolesTab'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 const TABS = [
   { id: 'personal', label: 'Personal Info' },
   { id: 'job', label: 'Job Info' },
   { id: 'work', label: 'Work Info' },
+  { id: 'roles', label: 'Roles' },
   { id: 'documents', label: 'Documents' },
 ]
 
@@ -178,6 +180,9 @@ export default function EmployeeDetailPage() {
               onSave={handleSave}
               canEdit={canEdit}
             />
+          )}
+          {activeTab === 'roles' && (
+            <RolesTab employeeUserId={employee.user?.id} isEditable={canEdit} />
           )}
           {activeTab === 'documents' && (
             <DocumentsTab employee={employee} canEdit={canEdit} />

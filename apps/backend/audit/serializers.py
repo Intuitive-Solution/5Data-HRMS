@@ -19,3 +19,5 @@ class AuditLogSerializer(serializers.ModelSerializer):
             'id', 'timestamp', 'ip_address', 'user_agent', 'metadata'
         )
 
+
+

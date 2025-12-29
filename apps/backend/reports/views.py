@@ -31,3 +31,5 @@ class ReportViewSet(viewsets.ViewSet):
         # TODO: Implement billing report logic
         return Response({'detail': 'Billing report'})
 
+
+

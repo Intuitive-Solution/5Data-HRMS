@@ -63,3 +63,5 @@ class LeaveBalance(models.Model):
     def __str__(self):
         return f'{self.employee.employee_id} - Leave Balance'
 
+
+

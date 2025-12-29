@@ -14,3 +14,5 @@ class BaseAdmin(admin.ModelAdmin):
         list_display.extend(['created_at', 'updated_at'])
         return list_display
 
+
+

@@ -34,3 +34,5 @@ class LeaveBalanceSerializer(serializers.ModelSerializer):
         fields = ('sick_leave', 'casual_leave', 'earned_leave', 'updated_at')
         read_only_fields = ('updated_at',)
 
+
+

@@ -43,3 +43,5 @@ class SoftDeleteModel(BaseModel):
         self.is_deleted = False
         self.save(update_fields=['is_deleted', 'updated_at'])
 
+
+

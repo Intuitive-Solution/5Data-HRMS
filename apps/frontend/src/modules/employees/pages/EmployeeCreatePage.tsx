@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCreateEmployee } from '../hooks/useEmployees'
 import type { CreateEmployeeRequest } from '@5data-hrms/shared'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import RoleSelect from '../components/RoleSelect'
 
 export default function EmployeeCreatePage() {
   const navigate = useNavigate()
@@ -36,6 +37,8 @@ export default function EmployeeCreatePage() {
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [selectedRole, setSelectedRole] = useState<string>('')
+  const [createdEmployeeId, setCreatedEmployeeId] = useState<string>('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -76,7 +79,19 @@ export default function EmployeeCreatePage() {
     }
 
     try {
-      await createEmployee.mutateAsync(formData)
+      const response = await createEmployee.mutateAsync(formData)
+      
+      // If a role was selected, assign it to the user
+      if (selectedRole && response?.user?.id) {
+        const { assignRoleToUser } = await import('../services/roleApi')
+        try {
+          await assignRoleToUser(String(response.user.id), selectedRole)
+        } catch (roleError) {
+          console.error('Error assigning role:', roleError)
+          // Don't block navigation if role assignment fails
+        }
+      }
+      
       navigate('/employees')
     } catch (error) {
       console.error('Error creating employee:', error)
@@ -312,6 +327,26 @@ export default function EmployeeCreatePage() {
                 disabled
                 className="input-field bg-surface opacity-50"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Role
+              </label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="input-field"
+              >
+                <option value="">Select a role (optional)</option>
+                <option value="employee">Employee</option>
+                <option value="reporting_manager">Reporting Manager</option>
+                <option value="project_lead">Project Lead</option>
+                <option value="project_manager">Project Manager</option>
+                <option value="hr_user">HR User</option>
+                <option value="finance_user">Finance User</option>
+                <option value="system_admin">System Admin</option>
+              </select>
             </div>
           </div>
         </div>

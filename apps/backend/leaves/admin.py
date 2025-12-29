@@ -20,3 +20,5 @@ class LeaveBalanceAdmin(admin.ModelAdmin):
     list_display = ('employee', 'sick_leave', 'casual_leave', 'earned_leave')
     search_fields = ('employee__employee_id', 'employee__user__email')
 
+
+

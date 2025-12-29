@@ -50,3 +50,5 @@ class LeaveViewSet(viewsets.ModelViewSet):
         # TODO: Implement leave rejection logic
         return Response({'detail': 'Leave rejected'})
 
+
+

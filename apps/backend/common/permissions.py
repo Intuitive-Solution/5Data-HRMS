@@ -1,5 +1,5 @@
 """
-Custom permission classes.
+Custom permission classes for role-based access control.
 """
 from rest_framework import permissions
 
@@ -18,31 +18,84 @@ class IsAuthenticated(permissions.BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
 
-class IsAdmin(permissions.BasePermission):
+class IsSystemAdmin(permissions.BasePermission):
     """Only allow system admins."""
 
     def has_permission(self, request, view):
         return (
             request.user
             and request.user.is_authenticated
-            and request.user.is_staff
+            and request.user.has_role('system_admin')
         )
 
 
-class IsHROrAdmin(permissions.BasePermission):
+class IsHR(permissions.BasePermission):
+    """Only allow HR users."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.has_role('hr_user')
+        )
+
+
+class IsHROrSystemAdmin(permissions.BasePermission):
     """Only allow HR users or system admins."""
 
     def has_permission(self, request, view):
         return (
             request.user
             and request.user.is_authenticated
-            and (request.user.is_staff or self._is_hr_user(request.user))
+            and (request.user.has_role('hr_user') or request.user.has_role('system_admin'))
         )
 
-    @staticmethod
-    def _is_hr_user(user):
-        """Check if user is an HR user. TODO: Implement role-based access control."""
-        # For now, check if user is staff
-        # This should be updated once role system is implemented
-        return user.is_staff
+
+class IsFinance(permissions.BasePermission):
+    """Only allow finance users."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.has_role('finance_user')
+        )
+
+
+class IsProjectManager(permissions.BasePermission):
+    """Only allow project managers."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.has_role('project_manager')
+        )
+
+
+class IsProjectLead(permissions.BasePermission):
+    """Only allow project leads."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.has_role('project_lead')
+        )
+
+
+class IsReportingManager(permissions.BasePermission):
+    """Only allow reporting managers."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.has_role('reporting_manager')
+        )
+
+
+# Legacy alias for backward compatibility
+IsAdmin = IsSystemAdmin
+IsHROrAdmin = IsHROrSystemAdmin
 

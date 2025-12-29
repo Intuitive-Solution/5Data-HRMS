@@ -21,3 +21,5 @@ class TimesheetEntryAdmin(admin.ModelAdmin):
     search_fields = ('timesheet__employee__employee_id', 'project__name')
     list_filter = ('date', 'project')
 
+
+

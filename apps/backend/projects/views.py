@@ -23,3 +23,5 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     search_fields = ['employee__employee_id', 'project__name']
 
+
+

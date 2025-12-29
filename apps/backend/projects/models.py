@@ -61,3 +61,5 @@ class ProjectAssignment(models.Model):
     def __str__(self):
         return f'{self.employee.employee_id} - {self.project.name}'
 
+
+

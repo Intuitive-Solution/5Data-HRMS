@@ -65,3 +65,5 @@ class TimesheetEntry(models.Model):
     def __str__(self):
         return f'{self.timesheet} - {self.date}'
 
+
+

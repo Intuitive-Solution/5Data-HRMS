@@ -23,3 +23,5 @@ class BaseTestCase(TestCase):
         """Clean up after tests."""
         User.objects.all().delete()
 
+
+
