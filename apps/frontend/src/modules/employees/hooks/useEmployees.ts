@@ -143,3 +143,38 @@ export const useDeleteDocument = (employeeId: string) => {
   })
 }
 
+/**
+ * Hook to get active employee count
+ * Fetches all employees across all pages and counts active ones
+ */
+export const useActiveEmployeeCount = () => {
+  return useQuery({
+    queryKey: [EMPLOYEE_QUERY_KEY, 'active-count'],
+    queryFn: async () => {
+      let allEmployees: Employee[] = []
+      let page = 1
+      let hasMore = true
+      
+      // Fetch all pages
+      while (hasMore) {
+        const response = await employeeApi.getEmployees(page, '', 'employee_id')
+        allEmployees = [...allEmployees, ...response.data.results]
+        
+        hasMore = !!response.data.next
+        page++
+        
+        // Safety limit to prevent infinite loops
+        if (page > 100) break
+      }
+      
+      // Count active employees
+      const activeCount = allEmployees.filter(
+        (employee) => employee.employment_status === 'active'
+      ).length
+      
+      return activeCount
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+

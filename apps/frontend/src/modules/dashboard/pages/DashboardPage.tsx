@@ -1,8 +1,10 @@
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
+import { useActiveEmployeeCount } from '@/modules/employees/hooks/useEmployees'
 
 export default function DashboardPage() {
   const { user } = useSelector((state: RootState) => state.auth)
+  const { data: activeEmployeeCount, isLoading: isLoadingActiveCount } = useActiveEmployeeCount()
 
   return (
     <div className="space-y-8">
@@ -17,7 +19,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="card">
           <h3 className="text-text-secondary text-sm font-medium">Total Employees</h3>
-          <p className="text-3xl font-bold text-primary mt-2">--</p>
+          <p className="text-3xl font-bold text-primary mt-2">
+            {isLoadingActiveCount ? '...' : activeEmployeeCount ?? '--'}
+          </p>
         </div>
         <div className="card">
           <h3 className="text-text-secondary text-sm font-medium">Pending Approvals</h3>
