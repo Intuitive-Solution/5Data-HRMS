@@ -153,6 +153,15 @@ export default function TimesheetPage() {
     if (existingTimesheet) {
       setWeekStart(existingTimesheet.week_start)
       setWeekEnd(existingTimesheet.week_end)
+      
+      // Initialize month/year from the timesheet
+      const date = new Date(existingTimesheet.week_start)
+      setSelectedYear(date.getFullYear())
+      setSelectedMonth(date.getMonth())
+      
+      // Reset week index so it gets set in the next effect
+      setSelectedWeekIndex(-1)
+      
       setRows(
         existingTimesheet.rows?.map(row => ({
           id: row.id,
@@ -174,30 +183,36 @@ export default function TimesheetPage() {
 
   // Calculate available weeks when month/year changes
   useEffect(() => {
-    if (!id) {
-      const weeks = getMonthWeeks(selectedYear, selectedMonth)
-      setAvailableWeeks(weeks)
+    const weeks = getMonthWeeks(selectedYear, selectedMonth)
+    setAvailableWeeks(weeks)
+    
+    // For new timesheets: Auto-select the current week or last week
+    if (!id && selectedWeekIndex === -1 && weeks.length > 0) {
+      const today = new Date()
+      const todayStr = today.toISOString().split('T')[0]
       
-      // Auto-select the current week or last week if new timesheet
-      if (selectedWeekIndex === -1 && weeks.length > 0) {
-        const today = new Date()
-        const todayStr = today.toISOString().split('T')[0]
-        
-        // Find which week today falls into
-        let foundWeekIndex = weeks.length - 1 // Default to last week
-        for (let i = 0; i < weeks.length; i++) {
-          if (todayStr >= weeks[i].start && todayStr <= weeks[i].end) {
-            foundWeekIndex = i
-            break
-          }
+      // Find which week today falls into
+      let foundWeekIndex = weeks.length - 1 // Default to last week
+      for (let i = 0; i < weeks.length; i++) {
+        if (todayStr >= weeks[i].start && todayStr <= weeks[i].end) {
+          foundWeekIndex = i
+          break
         }
-        
-        setSelectedWeekIndex(foundWeekIndex)
-        setWeekStart(weeks[foundWeekIndex].start)
-        setWeekEnd(weeks[foundWeekIndex].end)
+      }
+      
+      setSelectedWeekIndex(foundWeekIndex)
+      setWeekStart(weeks[foundWeekIndex].start)
+      setWeekEnd(weeks[foundWeekIndex].end)
+    }
+    
+    // For existing timesheets: Find and set the week index based on week_start
+    if (id && weekStart && weekEnd && selectedWeekIndex === -1) {
+      const weekIndex = weeks.findIndex(w => w.start === weekStart && w.end === weekEnd)
+      if (weekIndex !== -1) {
+        setSelectedWeekIndex(weekIndex)
       }
     }
-  }, [id, selectedYear, selectedMonth, selectedWeekIndex])
+  }, [selectedYear, selectedMonth, id, weekStart, weekEnd])
   
   // Update week dates when week selection changes
   const handleWeekChange = async (weekIndex: number) => {
@@ -208,25 +223,23 @@ export default function TimesheetPage() {
       setWeekStart(weekStart)
       setWeekEnd(weekEnd)
       
-      // Fetch existing timesheet for this week if creating new
-      if (!id) {
-        try {
-          const response = await timesheetApi.getMyTimesheets()
-          const timesheetForWeek = response.data.find(
-            ts => ts.week_start === weekStart && ts.week_end === weekEnd
-          )
-          
-          if (timesheetForWeek) {
-            // Load existing timesheet
-            navigate(`/timesheets/${timesheetForWeek.id}`)
-          } else {
-            // Clear rows for new timesheet
-            setRows([])
-          }
-        } catch (err) {
-          console.error('Failed to fetch timesheets:', err)
+      // Fetch existing timesheet for this week
+      try {
+        const response = await timesheetApi.getMyTimesheets()
+        const timesheetForWeek = response.data.find(
+          ts => ts.week_start === weekStart && ts.week_end === weekEnd
+        )
+        
+        if (timesheetForWeek) {
+          // Load existing timesheet
+          navigate(`/timesheets/${timesheetForWeek.id}`)
+        } else {
+          // No timesheet found for this week - clear rows
           setRows([])
         }
+      } catch (err) {
+        console.error('Failed to fetch timesheets:', err)
+        setRows([])
       }
     }
   }
@@ -434,9 +447,8 @@ export default function TimesheetPage() {
               )}
             </h2>
             
-            {/* New timesheet: Show month/week selector */}
-            {!id && (
-              <div className="flex gap-4 mb-4">
+            {/* Month/Week selector - shown for all timesheets */}
+            <div className="flex gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">
                     Month
@@ -449,7 +461,6 @@ export default function TimesheetPage() {
                     }}
                     className="input-field"
                     style={{ paddingRight: '2.5rem' }}
-                    disabled={!isEditable}
                   >
                     {/* Show current and previous 2 months */}
                     {Array.from({ length: 3 }, (_, i) => {
@@ -472,11 +483,10 @@ export default function TimesheetPage() {
                     Week
                   </label>
                   <select
-                    value={selectedWeekIndex}
+                    value={selectedWeekIndex.toString()}
                     onChange={(e) => handleWeekChange(Number(e.target.value))}
                     className="input-field"
                     style={{ paddingRight: '2.5rem' }}
-                    disabled={!isEditable}
                   >
                     {availableWeeks.map((week, index) => {
                       const startDate = new Date(week.start + 'T00:00:00')
@@ -490,7 +500,6 @@ export default function TimesheetPage() {
                   </select>
                 </div>
               </div>
-            )}
             
             {/* Show dates (read-only display) */}
             <div className="flex gap-4">
