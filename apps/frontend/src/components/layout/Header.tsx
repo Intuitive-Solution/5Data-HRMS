@@ -49,13 +49,13 @@ export default function Header() {
             )}
           </>
         )}
-        {/* <button
+        <button
           onClick={handleLogout}
           className="p-2 hover:bg-surface rounded-card transition-colors"
           title="Logout"
         >
           <ArrowLeftOnRectangleIcon className="w-5 h-5 text-text-secondary" />
-        </button> */}
+        </button>
       </div>
     </header>
   )
