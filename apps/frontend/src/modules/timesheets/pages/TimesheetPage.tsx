@@ -13,6 +13,7 @@ import {
   useCreateTimesheet,
   useUpdateTimesheet,
   useSubmitTimesheet,
+  useMyTimesheets,
 } from '../hooks/useTimesheets'
 import { useMyAssignedProjects } from '@/modules/projects/hooks/useProjects'
 import { timesheetApi } from '../services/timesheetApi'
@@ -132,6 +133,7 @@ export default function TimesheetPage() {
   
   const { data: existingTimesheet, isLoading: isLoadingTimesheet } = useTimesheet(id)
   const { data: assignedProjects = [], isLoading: isLoadingProjects } = useMyAssignedProjects()
+  const { data: allTimesheets = [] } = useMyTimesheets()
   const createTimesheet = useCreateTimesheet()
   const updateTimesheet = useUpdateTimesheet(id!)
   const submitTimesheet = useSubmitTimesheet(id!)
@@ -266,6 +268,17 @@ export default function TimesheetPage() {
     setSelectedYear(year)
     setSelectedMonth(month)
     setSelectedWeekIndex(-1) // Reset week selection
+  }
+
+  // Get status for a given week
+  const getWeekStatus = (weekStart: string, weekEnd: string): string => {
+    const timesheet = allTimesheets.find(
+      ts => ts.week_start === weekStart && ts.week_end === weekEnd
+    )
+    if (timesheet && timesheet.status) {
+      return timesheet.status.charAt(0).toUpperCase() + timesheet.status.slice(1)
+    }
+    return 'Missing'
   }
 
   const calculateDailyTotals = () => {
@@ -509,14 +522,15 @@ export default function TimesheetPage() {
                     value={selectedWeekIndex.toString()}
                     onChange={(e) => handleWeekChange(Number(e.target.value))}
                     className="input-field"
-                    style={{ paddingRight: '2.5rem' }}
+                    style={{ paddingRight: '2.5rem', minWidth: '350px', width: 'auto' }}
                   >
                     {availableWeeks.map((week, index) => {
                       const startDate = new Date(week.start + 'T00:00:00')
                       const endDate = new Date(week.end + 'T00:00:00')
+                      const weekStatus = getWeekStatus(week.start, week.end)
                       return (
                         <option key={index} value={index}>
-                          Week {index + 1}: {startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          Week {index + 1}: {startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ({weekStatus})
                         </option>
                       )
                     })}
