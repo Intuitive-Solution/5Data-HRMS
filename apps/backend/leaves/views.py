@@ -93,16 +93,19 @@ class LeaveViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def balance(self, request):
-        """Get leave balance."""
-        try:
-            balance = LeaveBalance.objects.get(employee=request.user.employee)
-            serializer = LeaveBalanceSerializer(balance)
-            return Response(serializer.data)
-        except LeaveBalance.DoesNotExist:
-            return Response(
-                {'detail': 'Leave balance not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        """Get leave balance. Create if doesn't exist."""
+        employee = request.user.employee
+        balance, created = LeaveBalance.objects.get_or_create(
+            employee=employee,
+            defaults={
+                'paid_leave': 5,
+                'sick_leave': 5,
+                'casual_leave': 5,
+                'earned_leave': 0,
+            }
+        )
+        serializer = LeaveBalanceSerializer(balance)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def holidays(self, request):

@@ -23,7 +23,7 @@ export default function LeaveListPage() {
   const [page, setPage] = useState(1)
 
   const { data: leaves, isLoading: leavesLoading, error: leavesError } = useMyLeaves(page)
-  const { data: balance, isLoading: balanceLoading } = useLeaveBalance()
+  const { data: balance, isLoading: balanceLoading, error: balanceError } = useLeaveBalance()
   const { data: holidays } = useHolidays()
   const deleteLeave = useDeleteLeave()
 
@@ -90,30 +90,34 @@ export default function LeaveListPage() {
 
       {/* Balance Cards */}
       <div className="grid grid-cols-4 gap-6">
-        {balance && (
+        {balanceLoading ? (
           <>
-            {/* Paid Leave Card */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-divider">
-              <h3 className="text-sm font-medium text-text-secondary mb-2">Paid Leave</h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-text-primary">
-                  {(balance.paid_leave - (used.paid_leave || 0)).toFixed(1)}
-                </span>
-                <span className="text-sm text-text-secondary">/ {balance.paid_leave}</span>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-lg p-6 shadow-sm border border-divider">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-20 mb-4"></div>
+                  <div className="h-8 bg-gray-200 rounded w-24 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-16"></div>
+                </div>
               </div>
-              <p className="text-xs text-text-secondary mt-3">
-                {used.paid_leave || 0} used
-              </p>
-            </div>
-
+            ))}
+          </>
+        ) : balanceError ? (
+          <div className="col-span-4 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+            Error loading leave balance. Please refresh the page.
+          </div>
+        ) : (
+          <>
             {/* Sick Leave Card */}
             <div className="bg-white rounded-lg p-6 shadow-sm border border-divider">
               <h3 className="text-sm font-medium text-text-secondary mb-2">Sick Leave</h3>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-text-primary">
-                  {(balance.sick_leave - (used.sick_leave || 0)).toFixed(1)}
+                  {balance ? (Number(balance.sick_leave) - (used.sick_leave || 0)).toFixed(1) : '0.0'}
                 </span>
-                <span className="text-sm text-text-secondary">/ {balance.sick_leave}</span>
+                <span className="text-sm text-text-secondary">
+                  / {balance ? Number(balance.sick_leave) : '0'}
+                </span>
               </div>
               <p className="text-xs text-text-secondary mt-3">
                 {used.sick_leave || 0} used
@@ -125,12 +129,30 @@ export default function LeaveListPage() {
               <h3 className="text-sm font-medium text-text-secondary mb-2">Casual Leave</h3>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-text-primary">
-                  {(balance.casual_leave - (used.casual_leave || 0)).toFixed(1)}
+                  {balance ? (Number(balance.casual_leave) - (used.casual_leave || 0)).toFixed(1) : '0.0'}
                 </span>
-                <span className="text-sm text-text-secondary">/ {balance.casual_leave}</span>
+                <span className="text-sm text-text-secondary">
+                  / {balance ? Number(balance.casual_leave) : '0'}
+                </span>
               </div>
               <p className="text-xs text-text-secondary mt-3">
                 {used.casual_leave || 0} used
+              </p>
+            </div>
+
+            {/* Earned Leave Card */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-divider">
+              <h3 className="text-sm font-medium text-text-secondary mb-2">Earned Leave</h3>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-text-primary">
+                  {balance ? (Number(balance.earned_leave) - (used.earned_leave || 0)).toFixed(1) : '0.0'}
+                </span>
+                <span className="text-sm text-text-secondary">
+                  / {balance ? Number(balance.earned_leave) : '0'}
+                </span>
+              </div>
+              <p className="text-xs text-text-secondary mt-3">
+                {used.earned_leave || 0} used
               </p>
             </div>
 
