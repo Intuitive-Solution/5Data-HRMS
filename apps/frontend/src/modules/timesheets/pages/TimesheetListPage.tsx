@@ -8,12 +8,98 @@ import {
   PencilIcon,
 } from '@heroicons/react/24/outline' // EyeIcon still needed for dropdown menu
 import { useMyTimesheets, useDeleteTimesheet } from '../hooks/useTimesheets'
+import { timesheetApi } from '../services/timesheetApi'
 import type { Timesheet } from '@5data-hrms/shared'
+
+// Calculate month-bounded weeks (same logic as backend and TimesheetPage)
+const getMonthWeeks = (year: number, month: number): { start: string; end: string }[] => {
+  const weeks: { start: string; end: string }[] = []
+  
+  // Get first and last day of month
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  
+  let currentDate = new Date(firstDay)
+  let weekCount = 0
+  
+  // Build weeks 1-4
+  while (currentDate <= lastDay && weekCount < 4) {
+    weekCount++
+    
+    // Calculate days until Saturday
+    // JavaScript getDay(): 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+    const dayOfWeek = currentDate.getDay()
+    let daysUntilSaturday = (6 - dayOfWeek)
+    if (daysUntilSaturday < 0) {
+      daysUntilSaturday += 7
+    }
+    
+    const weekEnd = new Date(currentDate)
+    weekEnd.setDate(weekEnd.getDate() + daysUntilSaturday)
+    
+    // Cap to end of month
+    const actualEnd = weekEnd > lastDay ? lastDay : weekEnd
+    
+    // Format dates as YYYY-MM-DD without timezone issues
+    const startStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`
+    const endStr = `${actualEnd.getFullYear()}-${String(actualEnd.getMonth() + 1).padStart(2, '0')}-${String(actualEnd.getDate()).padStart(2, '0')}`
+    
+    weeks.push({
+      start: startStr,
+      end: endStr
+    })
+    
+    // Move to next Sunday
+    currentDate = new Date(actualEnd)
+    currentDate.setDate(currentDate.getDate() + 1)
+  }
+  
+  // Week 5: if there are remaining days after Week 4
+  if (currentDate <= lastDay) {
+    // Calculate days until Saturday for Week 5
+    const dayOfWeek = currentDate.getDay()
+    let daysUntilSaturday = (6 - dayOfWeek)
+    if (daysUntilSaturday < 0) {
+      daysUntilSaturday += 7
+    }
+    
+    const week5End = new Date(currentDate)
+    week5End.setDate(week5End.getDate() + daysUntilSaturday)
+    
+    // Cap to end of month
+    const actualWeek5End = week5End > lastDay ? lastDay : week5End
+    
+    const startStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`
+    const endStr = `${actualWeek5End.getFullYear()}-${String(actualWeek5End.getMonth() + 1).padStart(2, '0')}-${String(actualWeek5End.getDate()).padStart(2, '0')}`
+    
+    weeks.push({
+      start: startStr,
+      end: endStr
+    })
+    
+    // Week 6: if there are remaining days after Week 5
+    const nextDate = new Date(actualWeek5End)
+    nextDate.setDate(nextDate.getDate() + 1)
+    
+    if (nextDate <= lastDay) {
+      const week6StartStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`
+      const week6EndStr = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`
+      
+      weeks.push({
+        start: week6StartStr,
+        end: week6EndStr
+      })
+    }
+  }
+  
+  return weeks
+}
 
 export default function TimesheetListPage() {
   const navigate = useNavigate()
   const { data: timesheets = [], isLoading, error } = useMyTimesheets()
   const deleteTimesheet = useDeleteTimesheet()
+  const [isCheckingTimesheet, setIsCheckingTimesheet] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null)
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
@@ -56,8 +142,63 @@ export default function TimesheetListPage() {
     })
   }
 
-  const handleCreateNew = () => {
-    navigate('/timesheets/new')
+  const handleCreateNew = async () => {
+    setIsCheckingTimesheet(true)
+    try {
+      // Get current date and its month-bounded week
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = today.getMonth()
+      
+      // Get all weeks for the current month
+      const monthWeeks = getMonthWeeks(year, month)
+      
+      // Find which week today falls into
+      let currentWeekStart = ''
+      let currentWeekEnd = ''
+      
+      for (const week of monthWeeks) {
+        const weekStartDate = new Date(week.start)
+        const weekEndDate = new Date(week.end)
+        
+        // Create a normalized today date for comparison (without time)
+        const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+        
+        // Check if today falls within this week
+        if (todayDate >= weekStartDate && todayDate <= weekEndDate) {
+          currentWeekStart = week.start
+          currentWeekEnd = week.end
+          break
+        }
+      }
+      
+      console.log('Looking for timesheet for current week:', JSON.stringify({ currentWeekStart, currentWeekEnd }))
+      console.log('Available timesheets:', JSON.stringify(timesheets.map(ts => ({ 
+        id: ts.id, 
+        week_start: ts.week_start, 
+        week_end: ts.week_end 
+      }))))
+      
+      // Check if timesheet already exists for current week
+      const existingTimesheet = timesheets.find(
+        ts => ts.week_start === currentWeekStart && ts.week_end === currentWeekEnd
+      )
+      
+      console.log('Found existing timesheet:', JSON.stringify(existingTimesheet))
+      
+      if (existingTimesheet) {
+        // Load existing timesheet
+        navigate(`/timesheets/${existingTimesheet.id}`)
+      } else {
+        // Navigate to new timesheet creation
+        navigate('/timesheets/new')
+      }
+    } catch (err) {
+      console.error('Error checking for existing timesheet:', err)
+      navigate('/timesheets/new')
+    } finally {
+      setIsCheckingTimesheet(false)
+    }
   }
 
   const handleView = (id: string) => {
@@ -90,10 +231,11 @@ export default function TimesheetListPage() {
         </div>
         <button
           onClick={handleCreateNew}
-          className="btn-primary flex items-center gap-2"
+          disabled={isCheckingTimesheet}
+          className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <PlusIcon className="w-5 h-5" />
-          New Timesheet
+          {isCheckingTimesheet ? 'Checking...' : 'New Timesheet'}
         </button>
       </div>
 
