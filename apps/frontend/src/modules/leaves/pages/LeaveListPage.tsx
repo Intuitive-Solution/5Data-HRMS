@@ -171,156 +171,159 @@ export default function LeaveListPage() {
         )}
       </div>
 
-      {/* Leave Requests Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-divider overflow-hidden">
-        <div className="p-6 border-b border-divider">
-          <h2 className="text-lg font-semibold text-text-primary">Leave Requests</h2>
+      {/* Leave Requests and Holidays Grid */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Leave Requests Table - 9 columns */}
+        <div className="col-span-12 lg:col-span-9 bg-white rounded-lg shadow-sm border border-divider overflow-hidden">
+          <div className="p-6 border-b border-divider">
+            <h2 className="text-lg font-semibold text-text-primary">Leave Requests</h2>
+          </div>
+
+          {leavesLoading ? (
+            <div className="p-6 text-center text-text-secondary">
+              Loading leave requests...
+            </div>
+          ) : leavesError ? (
+            <div className="p-6 text-center text-red-600">
+              Error loading leave requests
+            </div>
+          ) : leaves && leaves.results.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-surface border-b border-divider">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
+                        Start Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
+                        End Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
+                        Leave Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
+                        Days
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaves.results.map(leave => (
+                      <tr key={leave.id} className="border-b border-divider hover:bg-surface transition-colors">
+                        <td className="px-6 py-4 text-sm text-text-secondary">
+                          {new Date(leave.start_date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-text-secondary">
+                          {new Date(leave.end_date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-text-primary">
+                          {LEAVE_TYPE_LABELS[leave.leave_type]}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-text-secondary">
+                          {leave.number_of_days}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[leave.status].bg} ${STATUS_COLORS[leave.status].text}`}>
+                            {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {canDeleteLeave(leave) ? (
+                            <button
+                              onClick={() => handleDelete(leave)}
+                              disabled={deleteLeave.isPending}
+                              className="inline-flex items-center gap-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                              title="Delete leave"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                              <span className="text-xs">Delete</span>
+                            </button>
+                          ) : (
+                            <span className="text-xs text-text-secondary">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {leaves && leaves.count > 0 && (
+                <div className="px-6 py-4 border-t border-divider flex items-center justify-between bg-surface">
+                  <p className="text-sm text-text-secondary">
+                    Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, leaves.count)} of{' '}
+                    {leaves.count} leaves
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPage(page - 1)}
+                      disabled={!leaves.previous}
+                      className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-sm text-text-secondary">Page {page}</span>
+                    <button
+                      onClick={() => setPage(page + 1)}
+                      disabled={!leaves.next}
+                      className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="p-6 text-center text-text-secondary">
+              No leave requests yet. Click "Apply Leave" to create one.
+            </div>
+          )}
         </div>
 
-        {leavesLoading ? (
-          <div className="p-6 text-center text-text-secondary">
-            Loading leave requests...
-          </div>
-        ) : leavesError ? (
-          <div className="p-6 text-center text-red-600">
-            Error loading leave requests
-          </div>
-        ) : leaves && leaves.results.length > 0 ? (
-          <>
-            <div className="overflow-x-auto">
+        {/* Holidays Table - 3 columns */}
+        {holidays && holidays.length > 0 && (
+          <div className="col-span-12 lg:col-span-3 bg-white rounded-lg shadow-sm border border-divider overflow-hidden">
+            <div className="p-6 border-b border-divider">
+              <h2 className="text-lg font-semibold text-text-primary">Holidays</h2>
+            </div>
+
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
               <table className="w-full">
-                <thead className="bg-surface border-b border-divider">
+                <thead className="bg-surface border-b border-divider sticky top-0">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                      Start Date
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
+                      Date
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                      End Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                      Leave Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                      Days
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                      Actions
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-text-primary">
+                      Name
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {leaves.results.map(leave => (
-                    <tr key={leave.id} className="border-b border-divider hover:bg-surface transition-colors">
-                      <td className="px-6 py-4 text-sm text-text-secondary">
-                        {new Date(leave.start_date).toLocaleDateString()}
+                  {holidays.map((holiday, index) => (
+                    <tr key={index} className="border-b border-divider hover:bg-surface transition-colors">
+                      <td className="px-4 py-3 text-xs text-text-secondary">
+                        {new Date(holiday.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                       </td>
-                      <td className="px-6 py-4 text-sm text-text-secondary">
-                        {new Date(leave.end_date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-text-primary">
-                        {LEAVE_TYPE_LABELS[leave.leave_type]}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-text-secondary">
-                        {leave.number_of_days}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[leave.status].bg} ${STATUS_COLORS[leave.status].text}`}>
-                          {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {canDeleteLeave(leave) ? (
-                          <button
-                            onClick={() => handleDelete(leave)}
-                            disabled={deleteLeave.isPending}
-                            className="inline-flex items-center gap-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                            title="Delete leave"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                            <span className="text-xs">Delete</span>
-                          </button>
-                        ) : (
-                          <span className="text-xs text-text-secondary">-</span>
-                        )}
+                      <td className="px-4 py-3 text-xs text-text-primary">
+                        {holiday.name}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination */}
-            {leaves && leaves.count > 0 && (
-              <div className="px-6 py-4 border-t border-divider flex items-center justify-between bg-surface">
-                <p className="text-sm text-text-secondary">
-                  Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, leaves.count)} of{' '}
-                  {leaves.count} leaves
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage(page - 1)}
-                    disabled={!leaves.previous}
-                    className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-text-secondary">Page {page}</span>
-                  <button
-                    onClick={() => setPage(page + 1)}
-                    disabled={!leaves.next}
-                    className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="p-6 text-center text-text-secondary">
-            No leave requests yet. Click "Apply Leave" to create one.
           </div>
         )}
       </div>
-
-      {/* Holidays Table */}
-      {holidays && holidays.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-divider overflow-hidden">
-          <div className="p-6 border-b border-divider">
-            <h2 className="text-lg font-semibold text-text-primary">Holidays</h2>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-surface border-b border-divider">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">
-                    Holiday Name
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {holidays.map((holiday, index) => (
-                  <tr key={index} className="border-b border-divider hover:bg-surface transition-colors">
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {new Date(holiday.date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-primary">
-                      {holiday.name}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       {/* Apply Leave Modal */}
       <ApplyLeaveModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
