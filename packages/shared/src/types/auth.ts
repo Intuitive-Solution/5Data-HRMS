@@ -33,6 +33,7 @@ export interface AuthUser {
   last_name: string;
   roles: UserRole[];
   is_active: boolean;
+  picture?: string | null;
 }
 
 export interface ForgotPasswordRequest {

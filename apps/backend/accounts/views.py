@@ -50,7 +50,7 @@ class AuthViewSet(viewsets.ViewSet):
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
             },
-            'user': UserSerializer(user).data,
+            'user': UserSerializer(user, context={'request': request}).data,
         }
 
         return Response(
@@ -124,7 +124,7 @@ class AuthViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def me(self, request):
         """Get current user."""
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
 

@@ -38,7 +38,15 @@ export default function Header() {
               </p>
               <p className="text-xs text-text-secondary">{user.email}</p>
             </div>
-            <UserCircleIcon className="w-8 h-8 text-text-secondary" />
+            {user.picture ? (
+              <img
+                src={user.picture}
+                alt={`${user.first_name} ${user.last_name}`}
+                className="w-8 h-8 rounded-full object-cover border border-divider"
+              />
+            ) : (
+              <UserCircleIcon className="w-8 h-8 text-text-secondary" />
+            )}
           </>
         )}
         <button

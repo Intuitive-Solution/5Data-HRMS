@@ -12,15 +12,25 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     """User serializer."""
     roles = serializers.SerializerMethodField()
+    picture = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'is_active', 'roles')
+        fields = ('id', 'email', 'first_name', 'last_name', 'is_active', 'roles', 'picture')
         read_only_fields = ('id',)
     
     def get_roles(self, obj):
         """Get user roles."""
         return obj.get_role_names()
+    
+    def get_picture(self, obj):
+        """Get employee profile picture URL."""
+        if hasattr(obj, 'employee') and obj.employee and obj.employee.picture:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.employee.picture.url)
+            return obj.employee.picture.url
+        return None
 
 
 class LoginSerializer(serializers.Serializer):
