@@ -192,3 +192,23 @@ export const useActiveProjectCount = () => {
   })
 }
 
+/**
+ * Hook to get current user's assigned projects
+ */
+export const useMyAssignedProjects = () => {
+  return useQuery({
+    queryKey: [PROJECT_QUERY_KEY, 'my-projects'],
+    queryFn: async () => {
+      try {
+        const response = await projectApi.getMyAssignedProjects()
+        return response.data
+      } catch (error) {
+        console.error('Failed to fetch assigned projects:', error)
+        throw error
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  })
+}
+

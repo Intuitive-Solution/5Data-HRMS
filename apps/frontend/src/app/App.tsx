@@ -19,6 +19,9 @@ import EmployeeCreatePage from '@/modules/employees/pages/EmployeeCreatePage'
 import ProjectListPage from '@/modules/projects/pages/ProjectListPage'
 import ProjectDetailPage from '@/modules/projects/pages/ProjectDetailPage'
 import ProjectCreatePage from '@/modules/projects/pages/ProjectCreatePage'
+import TimesheetListPage from '@/modules/timesheets/pages/TimesheetListPage'
+import TimesheetPage from '@/modules/timesheets/pages/TimesheetPage'
+import TeamTimesheetsPage from '@/modules/timesheets/pages/TeamTimesheetsPage'
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>()
@@ -84,6 +87,12 @@ export default function App() {
           <Route path="/projects" element={<ProjectListPage />} />
           <Route path="/projects/new" element={<ProjectCreatePage />} />
           <Route path="/projects/:id" element={<ProjectDetailPage />} />
+
+          {/* Timesheet Routes */}
+          <Route path="/timesheets" element={<TimesheetListPage />} />
+          <Route path="/timesheets/new" element={<TimesheetPage />} />
+          <Route path="/timesheets/:id" element={<TimesheetPage />} />
+          <Route path="/timesheets/team" element={<TeamTimesheetsPage />} />
         </Route>
 
         {/* Fallback */}

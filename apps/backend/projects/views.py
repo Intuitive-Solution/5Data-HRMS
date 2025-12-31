@@ -5,6 +5,7 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Project, ProjectAssignment
@@ -20,6 +21,35 @@ class ProjectListCreateView(generics.ListCreateAPIView):
     search_fields = ['name', 'client']
     ordering_fields = ['start_date', 'created_at', 'name', 'status']
     filterset_fields = ['status']
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_assigned_projects(request):
+    """Get current user's assigned projects."""
+    try:
+        employee = request.user.employee
+        # Get all assignments for this employee (regardless of status)
+        # A user can still add timesheets for projects they were assigned to
+        assignments = ProjectAssignment.objects.filter(
+            employee=employee
+        ).select_related('project').order_by('project_id').distinct('project_id')
+        
+        # Get unique projects from assignments
+        project_ids = set()
+        projects = []
+        for assignment in assignments:
+            if assignment.project_id not in project_ids:
+                project_ids.add(assignment.project_id)
+                projects.append(assignment.project)
+        
+        serializer = ProjectSerializer(projects, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {'detail': str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):

@@ -8,11 +8,13 @@ from .views import (
     ProjectAssignmentsView,
     AssignmentListCreateView,
     AssignmentDetailView,
+    my_assigned_projects,
 )
 
 urlpatterns = [
     # Project endpoints
     path('', ProjectListCreateView.as_view(), name='project-list'),
+    path('my_projects/', my_assigned_projects, name='my-assigned-projects'),
     path('<int:pk>/', ProjectDetailView.as_view(), name='project-detail'),
     path('<int:pk>/assignments/', ProjectAssignmentsView.as_view(), name='project-assignments'),
     

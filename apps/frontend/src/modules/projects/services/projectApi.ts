@@ -113,5 +113,12 @@ export const projectApi = {
   deleteAssignment: (id: string) => {
     return api.delete(`${ASSIGNMENT_BASE_URL}/${id}/`)
   },
+
+  /**
+   * Get current user's assigned projects (active projects only)
+   */
+  getMyAssignedProjects: () => {
+    return api.get<Project[]>(`${PROJECT_BASE_URL}/my_projects/`)
+  },
 }
 

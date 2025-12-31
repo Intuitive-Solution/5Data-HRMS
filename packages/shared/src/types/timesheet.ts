@@ -4,66 +4,75 @@
 
 export type TimesheetStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
 
-export interface TimesheetEntry {
+export interface TimesheetRow {
   id: string;
-  date: string;
-  project_id: string;
-  hours: number;
+  project: string;
+  project_name: string;
+  project_client: string;
   task_description: string;
+  sun_hours: number;
+  mon_hours: number;
+  tue_hours: number;
+  wed_hours: number;
+  thu_hours: number;
+  fri_hours: number;
+  sat_hours: number;
+  row_total: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Timesheet {
   id: string;
+  employee: string;
   employee_id: string;
+  employee_name: string;
   week_start: string;
   week_end: string;
   status: TimesheetStatus;
   total_hours: number;
   submitted_at?: string;
   approved_at?: string;
-  approved_by_id?: string;
+  approved_by?: string;
+  approved_by_name?: string;
   rejection_reason?: string;
+  rows?: TimesheetRow[];
+  daily_totals?: Record<string, number>;
   created_at: string;
   updated_at: string;
 }
 
 export interface TimesheetDetail extends Timesheet {
-  entries: TimesheetEntry[];
-  employee: {
-    id: string;
-    employee_id: string;
-    user: {
-      first_name: string;
-      last_name: string;
-    };
-  };
-  approved_by?: {
-    id: string;
-    user: {
-      first_name: string;
-      last_name: string;
-    };
-  };
+  rows: TimesheetRow[];
+  daily_totals: Record<string, number>;
 }
 
-export interface CreateTimesheetEntryRequest {
-  date: string;
-  project_id: string;
-  hours: number;
+export interface CreateTimesheetRowRequest {
+  project: string;
   task_description: string;
+  sun_hours: number;
+  mon_hours: number;
+  tue_hours: number;
+  wed_hours: number;
+  thu_hours: number;
+  fri_hours: number;
+  sat_hours: number;
 }
 
 export interface CreateTimesheetRequest {
   week_start: string;
-  entries: CreateTimesheetEntryRequest[];
+  week_end: string;
+  rows: CreateTimesheetRowRequest[];
 }
 
 export interface UpdateTimesheetRequest {
-  entries: CreateTimesheetEntryRequest[];
+  week_start?: string;
+  week_end?: string;
+  rows: CreateTimesheetRowRequest[];
 }
 
-export interface SubmitTimesheetRequest {
-  action: 'submit' | 'approve' | 'reject';
+export interface TimesheetApprovalRequest {
+  action: 'approve' | 'reject';
   rejection_reason?: string;
 }
 
