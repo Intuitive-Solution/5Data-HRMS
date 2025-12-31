@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useQueryClient } from '@tanstack/react-query'
@@ -151,6 +151,58 @@ export default function TimesheetPage() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth())
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(-1)
   const [availableWeeks, setAvailableWeeks] = useState<{ start: string; end: string }[]>([])
+
+  // Merge assigned projects with projects from existing timesheet rows
+  // This ensures that projects referenced in timesheet rows are available
+  // even if the user has been removed from those projects
+  const availableProjects = useMemo(() => {
+    const projectMap = new Map<string, Project>()
+    
+    // Add all currently assigned projects
+    assignedProjects.forEach((project: Project) => {
+      projectMap.set(project.id, project)
+    })
+    
+    // Add projects from existing timesheet rows (even if not currently assigned)
+    if (existingTimesheet?.rows) {
+      existingTimesheet.rows.forEach((row) => {
+        if (row.project && !projectMap.has(row.project)) {
+          // Create a project object from the row data
+          projectMap.set(row.project, {
+            id: row.project,
+            name: row.project_name || 'Unknown Project',
+            client: row.project_client || '',
+            billing_type: 'time_and_material', // Default value
+            start_date: '',
+            end_date: null,
+            status: 'active', // Default value
+            description: '',
+          } as Project)
+        }
+      })
+    }
+    
+    // Also check rows in local state (for unsaved changes)
+    rows.forEach((row) => {
+      if (row.project && !projectMap.has(row.project)) {
+        // If we have project_name and project_client, use them
+        if (row.project_name) {
+          projectMap.set(row.project, {
+            id: row.project,
+            name: row.project_name,
+            client: row.project_client || '',
+            billing_type: 'time_and_material',
+            start_date: '',
+            end_date: null,
+            status: 'active',
+            description: '',
+          } as Project)
+        }
+      }
+    })
+    
+    return Array.from(projectMap.values())
+  }, [assignedProjects, existingTimesheet?.rows, rows])
 
   // Initialize form with existing timesheet data
   useEffect(() => {
@@ -338,7 +390,7 @@ export default function TimesheetPage() {
     
     // If changing project, also update project_name and project_client
     if (field === 'project' && typeof value === 'string') {
-      const selectedProject = assignedProjects.find((p: Project) => p.id === value)
+      const selectedProject = availableProjects.find((p: Project) => p.id === value)
       newRows[index] = {
         ...newRows[index],
         project: value,
@@ -699,14 +751,14 @@ export default function TimesheetPage() {
                         <option value="">
                           {isLoadingProjects ? 'Loading projects...' : 'Select Project'}
                         </option>
-                        {assignedProjects && assignedProjects.length > 0 ? (
-                          assignedProjects.map((project: Project) => (
+                        {availableProjects && availableProjects.length > 0 ? (
+                          availableProjects.map((project: Project) => (
                             <option key={project.id} value={project.id}>
                               {project.name} ({project.client})
                             </option>
                           ))
                         ) : (
-                          !isLoadingProjects && <option value="">No projects assigned</option>
+                          !isLoadingProjects && <option value="">No projects available</option>
                         )}
                       </select>
                     </td>
