@@ -1,6 +1,10 @@
+import { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/store'
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '@/store'
+import { loginSuccess } from '@/store/slices/authSlice'
+import { STORAGE_KEYS } from '@5data-hrms/shared'
+import type { AuthUser, AuthTokens } from '@5data-hrms/shared'
 
 // Layouts
 import AuthLayout from '@/layouts/AuthLayout'
@@ -17,7 +21,47 @@ import ProjectDetailPage from '@/modules/projects/pages/ProjectDetailPage'
 import ProjectCreatePage from '@/modules/projects/pages/ProjectCreatePage'
 
 export default function App() {
+  const dispatch = useDispatch<AppDispatch>()
   const { isAuthenticated } = useSelector((state: RootState) => state.auth)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Restore authentication state from localStorage on app load
+  useEffect(() => {
+    const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+    const userJson = localStorage.getItem(STORAGE_KEYS.USER)
+
+    if (accessToken && refreshToken && userJson) {
+      try {
+        const user: AuthUser = JSON.parse(userJson)
+        const tokens: AuthTokens = {
+          access: accessToken,
+          refresh: refreshToken,
+        }
+        dispatch(loginSuccess({ user, tokens }))
+      } catch (error) {
+        console.error('Failed to restore authentication state:', error)
+        // Clear corrupted localStorage data
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.USER)
+      }
+    }
+    // Mark initialization as complete
+    setIsInitialized(true)
+  }, [dispatch])
+
+  // Show loading screen while checking authentication
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Router>

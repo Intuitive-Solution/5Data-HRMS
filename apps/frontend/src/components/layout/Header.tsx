@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeftOnRectangleIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import type { RootState } from '@/store'
 import { logout } from '@/store/slices/authSlice'
+import { STORAGE_KEYS } from '@5data-hrms/shared'
 
 export default function Header() {
   const dispatch = useDispatch()
@@ -10,7 +11,15 @@ export default function Header() {
   const { user } = useSelector((state: RootState) => state.auth)
 
   const handleLogout = () => {
+    // Clear localStorage tokens
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.USER)
+    
+    // Clear Redux state
     dispatch(logout())
+    
+    // Redirect to login
     navigate('/login')
   }
 
