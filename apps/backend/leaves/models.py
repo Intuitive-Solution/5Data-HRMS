@@ -6,6 +6,7 @@ from employees.models import Employee
 from common.models import SoftDeleteModel
 
 LEAVE_TYPE_CHOICES = (
+    ('paid_leave', 'Paid Leave'),
     ('sick_leave', 'Sick Leave'),
     ('casual_leave', 'Casual Leave'),
     ('earned_leave', 'Earned Leave'),
@@ -52,9 +53,24 @@ class Leave(SoftDeleteModel):
         return f'{self.employee.employee_id} - {self.leave_type} ({self.start_date})'
 
 
+class LeaveAttachment(models.Model):
+    """Leave attachment model."""
+    leave = models.ForeignKey(Leave, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='leave_attachments/')
+    name = models.CharField(max_length=255)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f'{self.leave.id} - {self.name}'
+
+
 class LeaveBalance(models.Model):
     """Leave balance model."""
     employee = models.OneToOneField(Employee, on_delete=models.CASCADE, related_name='leave_balance')
+    paid_leave = models.DecimalField(max_digits=4, decimal_places=1, default=5)
     sick_leave = models.DecimalField(max_digits=4, decimal_places=1, default=5)
     casual_leave = models.DecimalField(max_digits=4, decimal_places=1, default=5)
     earned_leave = models.DecimalField(max_digits=4, decimal_places=1, default=0)

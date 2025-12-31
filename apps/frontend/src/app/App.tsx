@@ -22,6 +22,7 @@ import ProjectCreatePage from '@/modules/projects/pages/ProjectCreatePage'
 import TimesheetListPage from '@/modules/timesheets/pages/TimesheetListPage'
 import TimesheetPage from '@/modules/timesheets/pages/TimesheetPage'
 import TeamTimesheetsPage from '@/modules/timesheets/pages/TeamTimesheetsPage'
+import LeaveListPage from '@/modules/leaves/pages/LeaveListPage'
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>()
@@ -93,6 +94,9 @@ export default function App() {
           <Route path="/timesheets/new" element={<TimesheetPage />} />
           <Route path="/timesheets/:id" element={<TimesheetPage />} />
           <Route path="/timesheets/team" element={<TeamTimesheetsPage />} />
+
+          {/* Leave Routes */}
+          <Route path="/leaves" element={<LeaveListPage />} />
         </Route>
 
         {/* Fallback */}

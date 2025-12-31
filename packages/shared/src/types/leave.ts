@@ -2,9 +2,16 @@
  * Leave Management Types
  */
 
-export type LeaveType = 'sick_leave' | 'casual_leave' | 'earned_leave' | 'unpaid_leave';
+export type LeaveType = 'paid_leave' | 'sick_leave' | 'casual_leave' | 'earned_leave' | 'unpaid_leave';
 
 export type LeaveStatus = 'pending' | 'approved' | 'rejected';
+
+export interface LeaveAttachment {
+  id: string;
+  file: string;
+  name: string;
+  uploaded_at: string;
+}
 
 export interface Leave {
   id: string;
@@ -17,6 +24,7 @@ export interface Leave {
   status: LeaveStatus;
   approved_by_id?: string;
   approved_at?: string;
+  attachments?: LeaveAttachment[];
   created_at: string;
   updated_at: string;
 }
@@ -52,10 +60,11 @@ export interface ApproveLeaveRequest {
 }
 
 export interface LeaveBalance {
-  leave_type: LeaveType;
-  total: number;
-  used: number;
-  available: number;
+  paid_leave: number;
+  sick_leave: number;
+  casual_leave: number;
+  earned_leave: number;
+  updated_at: string;
 }
 
 export interface LeaveListResponse {
