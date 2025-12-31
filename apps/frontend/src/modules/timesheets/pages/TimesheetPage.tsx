@@ -654,8 +654,7 @@ export default function TimesheetPage() {
                       </select>
                     </td>
                     <td className="border border-divider px-4 py-3">
-                      <input
-                        type="text"
+                      <textarea
                         value={row.task_description}
                         onChange={(e) =>
                           handleRowChange(
@@ -665,8 +664,9 @@ export default function TimesheetPage() {
                           )
                         }
                         disabled={!isEditable}
-                        className="input-field"
+                        className="input-field resize-none"
                         placeholder="Task description"
+                        rows={2}
                       />
                     </td>
                     {['sun_hours', 'mon_hours', 'tue_hours', 'wed_hours', 'thu_hours', 'fri_hours', 'sat_hours'].map(
