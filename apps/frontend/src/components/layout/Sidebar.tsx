@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import logoIcon from "../../assests/sidebar/logo.png";
 import {
   HomeIcon,
@@ -12,42 +13,44 @@ import {
   Bars3Icon,
   ArrowRightOnRectangleIcon,
   XMarkIcon,
+  ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import { logout } from "@/store/slices/authSlice";
 
 type MenuItem = {
   name: string;
-  href: string;
+  href?: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  badge?: number;
+  action?: () => void;
 };
-
-const menuItems: MenuItem[] = [
-  { name: "Dashboard", href: "/", icon: HomeIcon },
-  { name: "Employees", href: "/employees", icon: UserGroupIcon },
-  { name: "Leaves", href: "/leaves", icon: CalendarDaysIcon },
-  { name: "Timesheets", href: "/timesheets", icon: ClockIcon },
-  { name: "Projects", href: "/projects", icon: FolderIcon },
-  { name: "Reports", href: "/reports", icon: DocumentChartBarIcon },
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
-];
 
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const menuItems: MenuItem[] = [
+    { name: "Dashboard", href: "/", icon: HomeIcon },
+    { name: "Employees", href: "/employees", icon: UserGroupIcon },
+    { name: "Leaves", href: "/leaves", icon: CalendarDaysIcon },
+    { name: "Timesheets", href: "/timesheets", icon: ClockIcon },
+    { name: "Projects", href: "/projects", icon: FolderIcon },
+    { name: "Reports", href: "/reports", icon: DocumentChartBarIcon },
+    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+    {
+      name: "Logout",
+      icon: ArrowLeftOnRectangleIcon,
+      action: () => {
+        dispatch(logout());
+        navigate("/login");
+      },
+    },
+  ];
 
   return (
     <>
-      {/* ================= DESKTOP & TABLET (UNCHANGED) ================= */}
-      <aside className="
-        hidden sm:flex
-        w-24
-        h-screen
-        bg-primary
-        flex-col
-        items-center
-        py-2
-        text-white
-        rounded-r-2xl
-      ">
+      {/* ================= DESKTOP & TABLET ================= */}
+      <aside className="hidden sm:flex w-24 h-screen bg-primary flex-col items-center py-2 text-white rounded-r-2xl">
         {/* Logo */}
         <div className="py-2">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden">
@@ -62,10 +65,25 @@ export default function Sidebar() {
           {menuItems.map((item) => {
             const Icon = item.icon;
 
+            // 🔴 LOGOUT (ACTION)
+            if (item.action) {
+              return (
+                <button
+                  key={item.name}
+                  onClick={item.action}
+                  className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-white/70 hover:bg-white/10 hover:text-white transition-all duration-200"
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-xs text-center">{item.name}</span>
+                </button>
+              );
+            }
+
+            // 🟢 ROUTE
             return (
               <NavLink
                 key={item.name}
-                to={item.href}
+                to={item.href!}
                 end={item.href === "/"}
                 className={({ isActive }) =>
                   `
@@ -73,7 +91,7 @@ export default function Sidebar() {
                   transition-all duration-200
                   ${
                     isActive
-                      ? "bg-white/20 text-white"
+                      ? "bg-white/20 text-white hover:text-white"
                       : "text-white/70 hover:bg-white/10 hover:text-white"
                   }
                 `
@@ -84,7 +102,6 @@ export default function Sidebar() {
                     {isActive && (
                       <span className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
                     )}
-
                     <Icon className="w-5 h-5" />
                     <span className="text-xs text-center">{item.name}</span>
                   </>
@@ -96,29 +113,22 @@ export default function Sidebar() {
       </aside>
 
       {/* ================= MOBILE TOP BAR ================= */}
-      <header className="
-        sm:hidden
-        fixed top-0 left-0 right-0
-        h-14
-        bg-primary
-        flex items-center
-        justify-between
-        px-4
-        text-white
-        z-50
-      ">
-        {/* Hamburger */}
+      <header className="sm:hidden fixed top-0 left-0 right-0 h-14 bg-primary flex items-center justify-between px-4 text-white z-50">
         <button onClick={() => setMobileOpen(true)}>
           <Bars3Icon className="w-6 h-6" />
         </button>
 
-        {/* Center Logo */}
-        <div className="w-auto h-auto px-2 rounded-lg bg-white flex items-center justify-center gap-2">
-          <img src={logoIcon} alt="logo" className="w-6" /><h3 className="text-primary">5 DATA INC.</h3>
+        <div className="w-auto h-auto px-2 rounded-lg bg-white flex items-center gap-2">
+          <img src={logoIcon} alt="logo" className="w-6" />
+          <h3 className="text-primary">5 DATA INC.</h3>
         </div>
 
-        {/* Logout */}
-        <button>
+        <button
+          onClick={() => {
+            dispatch(logout());
+            navigate("/login");
+          }}
+        >
           <ArrowRightOnRectangleIcon className="w-6 h-6" />
         </button>
       </header>
@@ -131,23 +141,17 @@ export default function Sidebar() {
         />
       )}
 
-      {/* ================= MOBILE SLIDE-IN SIDEBAR ================= */}
+      {/* ================= MOBILE SIDEBAR ================= */}
       <aside
         className={`
-          sm:hidden
-          fixed top-0 left-0
-          h-full w-64
-          bg-primary
-          text-white
-          z-50
+          sm:hidden fixed top-0 left-0 h-full w-64 bg-primary text-white z-50
           transform transition-transform duration-300
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2 bg-white rounded-lg px-2 py-1">
-          <img src={logoIcon} alt="logo" className="w-6" />
+            <img src={logoIcon} alt="logo" className="w-6" />
             <span className="font-semibold text-primary">5 DATA INC.</span>
           </div>
           <button onClick={() => setMobileOpen(false)}>
@@ -157,15 +161,30 @@ export default function Sidebar() {
 
         <div className="h-px bg-white/20 mb-4" />
 
-        {/* Menu */}
         <nav className="flex flex-col gap-2 px-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
 
+            if (item.action) {
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => {
+                    item.action?.();
+                    setMobileOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white"
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{item.name}</span>
+                </button>
+              );
+            }
+
             return (
               <NavLink
                 key={item.name}
-                to={item.href}
+                to={item.href!}
                 end={item.href === "/"}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
