@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useQueryClient } from '@tanstack/react-query'
 import type { RootState } from '@/store'
 import {
   PlusIcon,
@@ -17,7 +18,7 @@ import {
 } from '../hooks/useTimesheets'
 import { useMyAssignedProjects } from '@/modules/projects/hooks/useProjects'
 import { timesheetApi } from '../services/timesheetApi'
-import type { Timesheet, TimesheetRow, CreateTimesheetRequest, CreateTimesheetRowRequest, Project } from '@5data-hrms/shared'
+import type { Timesheet, TimesheetDetail, TimesheetRow, CreateTimesheetRequest, CreateTimesheetRowRequest, Project } from '@5data-hrms/shared'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -134,6 +135,7 @@ export default function TimesheetPage() {
   const { data: existingTimesheet, isLoading: isLoadingTimesheet } = useTimesheet(id)
   const { data: assignedProjects = [], isLoading: isLoadingProjects } = useMyAssignedProjects()
   const { data: allTimesheets = [] } = useMyTimesheets()
+  const queryClient = useQueryClient()
   const createTimesheet = useCreateTimesheet()
   const updateTimesheet = useUpdateTimesheet(id!)
   const submitTimesheet = useSubmitTimesheet(id!)
@@ -406,8 +408,49 @@ export default function TimesheetPage() {
       return
     }
 
+    if (rows.length === 0) {
+      setError('At least one row is required')
+      return
+    }
+
     try {
-      await submitTimesheet.mutateAsync()
+      const rowsData: CreateTimesheetRowRequest[] = rows.map(row => ({
+        project: row.project,
+        task_description: row.task_description,
+        sun_hours: row.sun_hours,
+        mon_hours: row.mon_hours,
+        tue_hours: row.tue_hours,
+        wed_hours: row.wed_hours,
+        thu_hours: row.thu_hours,
+        fri_hours: row.fri_hours,
+        sat_hours: row.sat_hours,
+      }))
+
+      let timesheetId = id
+
+      // If no ID exists, create the timesheet first
+      if (!timesheetId) {
+        const createdTimesheet = await createTimesheet.mutateAsync({
+          week_start: weekStart,
+          week_end: weekEnd,
+          rows: rowsData,
+        }) as TimesheetDetail
+        timesheetId = createdTimesheet.id.toString()
+      } else {
+        // Update existing timesheet if needed
+        await updateTimesheet.mutateAsync({
+          week_start: weekStart,
+          week_end: weekEnd,
+          rows: rowsData,
+        })
+      }
+
+      // Submit the timesheet
+      await timesheetApi.submitTimesheet(timesheetId)
+      
+      // Invalidate queries to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['my-timesheets'] })
+      
       navigate('/timesheets')
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Failed to submit timesheet')
