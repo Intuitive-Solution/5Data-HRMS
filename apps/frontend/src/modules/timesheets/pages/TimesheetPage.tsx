@@ -151,16 +151,29 @@ export default function TimesheetPage() {
   // Initialize form with existing timesheet data
   useEffect(() => {
     if (existingTimesheet) {
-      setWeekStart(existingTimesheet.week_start)
-      setWeekEnd(existingTimesheet.week_end)
+      const weekStart = existingTimesheet.week_start
+      const weekEnd = existingTimesheet.week_end
+      setWeekStart(weekStart)
+      setWeekEnd(weekEnd)
       
       // Initialize month/year from the timesheet
-      const date = new Date(existingTimesheet.week_start)
-      setSelectedYear(date.getFullYear())
-      setSelectedMonth(date.getMonth())
+      const date = new Date(weekStart)
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      setSelectedYear(year)
+      setSelectedMonth(month)
       
-      // Reset week index so it gets set in the next effect
-      setSelectedWeekIndex(-1)
+      // Calculate available weeks and find the matching week index
+      const weeks = getMonthWeeks(year, month)
+      setAvailableWeeks(weeks)
+      
+      // Find the week index that matches this timesheet's week
+      const weekIndex = weeks.findIndex(w => w.start === weekStart && w.end === weekEnd)
+      if (weekIndex !== -1) {
+        setSelectedWeekIndex(weekIndex)
+      } else {
+        setSelectedWeekIndex(-1)
+      }
       
       setRows(
         existingTimesheet.rows?.map(row => ({
@@ -206,9 +219,11 @@ export default function TimesheetPage() {
     }
     
     // For existing timesheets: Find and set the week index based on week_start
-    if (id && weekStart && weekEnd && selectedWeekIndex === -1) {
+    // Always check if the current weekStart/weekEnd matches a week, even if selectedWeekIndex is already set
+    // This ensures the dropdown stays in sync when timesheet data loads
+    if (id && weekStart && weekEnd && weeks.length > 0) {
       const weekIndex = weeks.findIndex(w => w.start === weekStart && w.end === weekEnd)
-      if (weekIndex !== -1) {
+      if (weekIndex !== -1 && selectedWeekIndex !== weekIndex) {
         setSelectedWeekIndex(weekIndex)
       }
     }
