@@ -249,11 +249,13 @@ export default function TimesheetPage() {
           // Load existing timesheet
           navigate(`/timesheets/${timesheetForWeek.id}`)
         } else {
-          // No timesheet found for this week - clear rows
+          // No timesheet found for this week - navigate to new timesheet page
+          navigate('/timesheets/new')
           setRows([])
         }
       } catch (err) {
         console.error('Failed to fetch timesheets:', err)
+        navigate('/timesheets/new')
         setRows([])
       }
     }
@@ -422,24 +424,6 @@ export default function TimesheetPage() {
           <ArrowLeftIcon className="w-5 h-5" />
           Back to Timesheets
         </button>
-        {existingTimesheet && (
-          <div className="flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                existingTimesheet.status === 'draft'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : existingTimesheet.status === 'submitted'
-                    ? 'bg-blue-100 text-blue-800'
-                    : existingTimesheet.status === 'approved'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-              }`}
-            >
-              {existingTimesheet.status.charAt(0).toUpperCase() +
-                existingTimesheet.status.slice(1)}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Main Card */}
@@ -447,20 +431,44 @@ export default function TimesheetPage() {
         <div className="space-y-6">
           {/* Week Selector */}
           <div className="border-b border-divider pb-6">
-            <h2 className="text-xl font-semibold text-text-primary mb-4">
-              {weekStart && weekEnd ? (
-                <>
-                  Week of {new Date(weekStart + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -{' '}
-                  {new Date(weekEnd + 'T00:00:00').toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </>
-              ) : (
-                'Select a Week'
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-xl font-semibold text-text-primary">
+                {weekStart && weekEnd ? (
+                  <>
+                    Week of {new Date(weekStart + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -{' '}
+                    {new Date(weekEnd + 'T00:00:00').toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </>
+                ) : (
+                  'Select a Week'
+                )}
+              </h2>
+              {!isLoadingTimesheet && (
+                existingTimesheet && existingTimesheet.id && existingTimesheet.status ? (
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      existingTimesheet.status === 'draft'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : existingTimesheet.status === 'submitted'
+                          ? 'bg-blue-100 text-blue-800'
+                          : existingTimesheet.status === 'approved'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {existingTimesheet.status.charAt(0).toUpperCase() +
+                      existingTimesheet.status.slice(1)}
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    New
+                  </span>
+                )
               )}
-            </h2>
+            </div>
             
             {/* Month/Week selector - shown for all timesheets */}
             <div className="flex gap-4 mb-4">
