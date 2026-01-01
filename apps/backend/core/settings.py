@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'timesheets',
     'reports',
     'audit',
+    'settings',
 ]
 
 MIDDLEWARE = [

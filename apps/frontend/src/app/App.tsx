@@ -23,6 +23,10 @@ import TimesheetListPage from '@/modules/timesheets/pages/TimesheetListPage'
 import TimesheetPage from '@/modules/timesheets/pages/TimesheetPage'
 import TeamTimesheetsPage from '@/modules/timesheets/pages/TeamTimesheetsPage'
 import LeaveListPage from '@/modules/leaves/pages/LeaveListPage'
+import SettingsDashboard from '@/modules/settings/pages/SettingsDashboard'
+import DepartmentsPage from '@/modules/settings/pages/DepartmentsPage'
+import LocationsPage from '@/modules/settings/pages/LocationsPage'
+import HolidaysPage from '@/modules/settings/pages/HolidaysPage'
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>()
@@ -97,6 +101,12 @@ export default function App() {
 
           {/* Leave Routes */}
           <Route path="/leaves" element={<LeaveListPage />} />
+
+          {/* Settings Routes */}
+          <Route path="/settings" element={<SettingsDashboard />} />
+          <Route path="/settings/departments" element={<DepartmentsPage />} />
+          <Route path="/settings/locations" element={<LocationsPage />} />
+          <Route path="/settings/holidays" element={<HolidaysPage />} />
         </Route>
 
         {/* Fallback */}

@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/v1/projects/', include('projects.urls')),
     path('api/v1/reports/', include('reports.urls')),
     path('api/v1/audit-logs/', include('audit.urls')),
+    path('api/v1/settings/', include('settings.urls')),
 ]
 
 if settings.DEBUG:
