@@ -6,11 +6,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter, SearchFilter
-from .models import Department, Location, Holiday
+from .models import Department, Location, Holiday, Client
 from .serializers import (
     DepartmentSerializer,
     LocationSerializer,
     HolidaySerializer,
+    ClientSerializer,
     CountSerializer,
 )
 
@@ -116,6 +117,47 @@ class HolidayViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         """Soft delete holiday."""
+        instance = self.get_object()
+        instance.soft_delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ClientViewSet(viewsets.ModelViewSet):
+    """Client viewset with CRUD and count endpoint."""
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = [
+        'code',
+        'name',
+        'description',
+        'address',
+        'contact_person',
+        'person_name',
+        'email',
+        'phone',
+    ]
+    ordering_fields = ['code', 'name', 'status', 'created_at']
+    ordering = ['name']
+
+    def get_queryset(self):
+        """Filter clients by status if provided."""
+        queryset = super().get_queryset()
+        status_filter = self.request.query_params.get('status')
+        if status_filter and status_filter in ['active', 'inactive']:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
+
+    @action(detail=False, methods=['get'])
+    def count(self, request):
+        """Get total count of clients."""
+        count = self.get_queryset().count()
+        serializer = CountSerializer({'count': count})
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete client."""
         instance = self.get_object()
         instance.soft_delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -3,6 +3,8 @@ import { settingsApi } from '../services/settingsApi'
 import type {
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
+  CreateClientRequest,
+  UpdateClientRequest,
   CreateLocationRequest,
   UpdateLocationRequest,
   CreateHolidayRequest,
@@ -13,6 +15,7 @@ import type {
 const DEPARTMENTS_KEY = 'departments'
 const LOCATIONS_KEY = 'locations'
 const HOLIDAYS_KEY = 'holidays'
+const CLIENTS_KEY = 'clients'
 
 // ==================== DEPARTMENTS ====================
 
@@ -242,6 +245,85 @@ export const useHolidaysCount = () => {
     queryKey: [HOLIDAYS_KEY, 'count'],
     queryFn: () => settingsApi.getHolidaysCount().then(res => res.data.count),
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+// ==================== CLIENTS ====================
+
+/**
+ * Hook to fetch all clients
+ */
+export const useClients = (page = 1, search = '', ordering = '') => {
+  return useQuery({
+    queryKey: [CLIENTS_KEY, page, search, ordering],
+    queryFn: () => settingsApi.getClients(page, search, ordering).then(res => res.data),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/**
+ * Hook to fetch single client by ID
+ */
+export const useClient = (id: string | undefined) => {
+  return useQuery({
+    queryKey: [CLIENTS_KEY, id],
+    queryFn: () => settingsApi.getClientById(id!).then(res => res.data),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/**
+ * Hook to get clients count
+ */
+export const useClientsCount = () => {
+  return useQuery({
+    queryKey: [CLIENTS_KEY, 'count'],
+    queryFn: () => settingsApi.getClientsCount().then(res => res.data.count),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/**
+ * Hook to create client
+ */
+export const useCreateClient = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: CreateClientRequest) => settingsApi.createClient(data).then(res => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CLIENTS_KEY] })
+    },
+  })
+}
+
+/**
+ * Hook to update client
+ */
+export const useUpdateClient = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateClientRequest }) =>
+      settingsApi.updateClient(id, data).then(res => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CLIENTS_KEY] })
+    },
+  })
+}
+
+/**
+ * Hook to delete client
+ */
+export const useDeleteClient = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => settingsApi.deleteClient(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CLIENTS_KEY] })
+    },
   })
 }
 

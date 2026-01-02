@@ -69,7 +69,59 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Scrollable table container */
+  .table-container {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Sticky first column for horizontal scroll */
+  .table-sticky-col {
+    @apply min-w-full;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .table-sticky-col th:first-child,
+  .table-sticky-col td:first-child {
+    @apply sticky left-0 z-10;
+    min-width: 120px;
+  }
+
+  .table-sticky-col th:first-child {
+    @apply bg-surface z-20;
+  }
+
+  .table-sticky-col td:first-child {
+    @apply bg-white;
+  }
+
+  .table-sticky-col tbody tr:hover td:first-child {
+    @apply bg-gray-50;
+  }
+
+  /* Shadow indicator for sticky column edge */
+  .table-sticky-col th:first-child::after,
+  .table-sticky-col td:first-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -8px;
+    bottom: 0;
+    width: 8px;
+    pointer-events: none;
+    /* background: linear-gradient(to right, rgba(0,0,0,0.06), transparent); */
+  }
+
+  /* Ensure relative positioning for pseudo-element */
+  .table-sticky-col th:first-child,
+  .table-sticky-col td:first-child {
+    position: sticky;
+    left: 0;
+  }
 }
+
 
 
 

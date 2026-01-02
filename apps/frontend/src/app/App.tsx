@@ -27,6 +27,7 @@ import SettingsDashboard from '@/modules/settings/pages/SettingsDashboard'
 import DepartmentsPage from '@/modules/settings/pages/DepartmentsPage'
 import LocationsPage from '@/modules/settings/pages/LocationsPage'
 import HolidaysPage from '@/modules/settings/pages/HolidaysPage'
+import ClientsPage from '@/modules/settings/pages/ClientsPage'
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>()
@@ -105,6 +106,7 @@ export default function App() {
           {/* Settings Routes */}
           <Route path="/settings" element={<SettingsDashboard />} />
           <Route path="/settings/departments" element={<DepartmentsPage />} />
+          <Route path="/settings/clients" element={<ClientsPage />} />
           <Route path="/settings/locations" element={<LocationsPage />} />
           <Route path="/settings/holidays" element={<HolidaysPage />} />
         </Route>

@@ -4,6 +4,10 @@ import type {
   DepartmentListResponse,
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
+  Client,
+  ClientListResponse,
+  CreateClientRequest,
+  UpdateClientRequest,
   Location,
   LocationListResponse,
   CreateLocationRequest,
@@ -185,6 +189,60 @@ export const settingsApi = {
    */
   getHolidaysCount: () => {
     return api.get<CountResponse>(`${SETTINGS_BASE_URL}/holidays/count/`)
+  },
+
+  // ==================== CLIENTS ====================
+
+  /**
+   * Get all clients with pagination, sorting, and optional status filter
+   */
+  getClients: (page = 1, search = '', ordering = '', status = '') => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      search,
+    })
+    if (ordering) {
+      params.append('ordering', ordering)
+    }
+    if (status) {
+      params.append('status', status)
+    }
+    return api.get<ClientListResponse>(`${SETTINGS_BASE_URL}/clients/?${params}`)
+  },
+
+  /**
+   * Get client by ID
+   */
+  getClientById: (id: string) => {
+    return api.get<Client>(`${SETTINGS_BASE_URL}/clients/${id}/`)
+  },
+
+  /**
+   * Create new client
+   */
+  createClient: (data: CreateClientRequest) => {
+    return api.post<Client>(`${SETTINGS_BASE_URL}/clients/`, data)
+  },
+
+  /**
+   * Update client
+   */
+  updateClient: (id: string, data: UpdateClientRequest) => {
+    return api.patch<Client>(`${SETTINGS_BASE_URL}/clients/${id}/`, data)
+  },
+
+  /**
+   * Delete client
+   */
+  deleteClient: (id: string) => {
+    return api.delete(`${SETTINGS_BASE_URL}/clients/${id}/`)
+  },
+
+  /**
+   * Get clients count
+   */
+  getClientsCount: () => {
+    return api.get<CountResponse>(`${SETTINGS_BASE_URL}/clients/count/`)
   },
 }
 

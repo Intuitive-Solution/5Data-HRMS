@@ -2,18 +2,21 @@ import {
   BuildingOfficeIcon,
   MapPinIcon,
   CalendarDaysIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline'
 import SettingsCard from '../components/SettingsCard'
 import {
   useDepartmentsCount,
   useLocationsCount,
   useHolidaysCount,
+  useClientsCount,
 } from '../hooks/useSettings'
 
 export default function SettingsDashboard() {
   const { data: departmentsCount, isLoading: isDepartmentsLoading } = useDepartmentsCount()
   const { data: locationsCount, isLoading: isLocationsLoading } = useLocationsCount()
   const { data: holidaysCount, isLoading: isHolidaysLoading } = useHolidaysCount()
+  const { data: clientsCount, isLoading: isClientsLoading } = useClientsCount()
 
   return (
     <div className="space-y-8">
@@ -21,7 +24,7 @@ export default function SettingsDashboard() {
       <div>
         <h1 className="text-3xl font-bold text-text-primary">Settings</h1>
         <p className="text-text-secondary mt-2">
-          Manage your organization's departments, locations, and holidays
+          Manage your organization's departments, locations, holidays, and clients
         </p>
       </div>
 
@@ -56,6 +59,16 @@ export default function SettingsDashboard() {
           description="Manage company holidays"
           icon={<CalendarDaysIcon className="w-7 h-7" />}
         />
+
+        {/* Clients Card */}
+        <SettingsCard
+          title="Clients"
+          count={clientsCount}
+          isLoading={isClientsLoading}
+          href="/settings/clients"
+          description="Manage client organizations"
+          icon={<UserGroupIcon className="w-7 h-7" />}
+        />
       </div>
 
       {/* Additional Info Section */}
@@ -78,6 +91,12 @@ export default function SettingsDashboard() {
             <span className="w-2 h-2 mt-2 rounded-full bg-primary flex-shrink-0" />
             <span>
               <strong className="text-text-primary">Holidays</strong> are company-wide days off that affect leave calculations.
+            </span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="w-2 h-2 mt-2 rounded-full bg-primary flex-shrink-0" />
+            <span>
+              <strong className="text-text-primary">Clients</strong> help you manage external organizations and their key contacts.
             </span>
           </li>
         </ul>

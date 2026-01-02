@@ -3,7 +3,7 @@ Settings admin.
 """
 from django.contrib import admin
 from common.admin import BaseAdmin
-from .models import Department, Location, Holiday
+from .models import Department, Location, Holiday, Client
 
 
 @admin.register(Department)
@@ -50,6 +50,33 @@ class HolidayAdmin(BaseAdmin):
     fieldsets = (
         ('Holiday Information', {
             'fields': ('name', 'date', 'is_optional')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at', 'is_deleted')
+        }),
+    )
+
+
+@admin.register(Client)
+class ClientAdmin(BaseAdmin):
+    """Client admin."""
+    list_display = ('code', 'name', 'status', 'created_at', 'updated_at')
+    search_fields = ('code', 'name', 'description', 'address', 'contact_person', 'person_name', 'email', 'phone')
+    list_filter = ('status', 'created_at')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Client Information', {
+            'fields': (
+                'code',
+                'name',
+                'description',
+                'address',
+                'contact_person',
+                'person_name',
+                'email',
+                'phone',
+                'status',
+            )
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at', 'is_deleted')

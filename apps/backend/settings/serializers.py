@@ -2,7 +2,7 @@
 Settings serializers.
 """
 from rest_framework import serializers
-from .models import Department, Location, Holiday
+from .models import Department, Location, Holiday, Client
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -29,6 +29,28 @@ class HolidaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Holiday
         fields = ('id', 'name', 'date', 'is_optional', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    """Client serializer."""
+
+    class Meta:
+        model = Client
+        fields = (
+            'id',
+            'code',
+            'name',
+            'description',
+            'address',
+            'contact_person',
+            'person_name',
+            'email',
+            'phone',
+            'status',
+            'created_at',
+            'updated_at',
+        )
         read_only_fields = ('id', 'created_at', 'updated_at')
 
 

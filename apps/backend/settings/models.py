@@ -66,3 +66,27 @@ class Holiday(SoftDeleteModel):
     def __str__(self):
         return f"{self.name} ({self.date})"
 
+
+class Client(SoftDeleteModel):
+    """Client model."""
+    code = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    address = models.TextField(blank=True)
+    contact_person = models.CharField(max_length=150, blank=True, default='')
+    person_name = models.CharField(max_length=150, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
+    phone = models.CharField(max_length=50, blank=True, default='')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+
+    class Meta:
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['code']),
+            models.Index(fields=['name']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+

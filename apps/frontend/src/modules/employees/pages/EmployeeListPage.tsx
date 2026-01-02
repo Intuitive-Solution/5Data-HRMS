@@ -111,17 +111,17 @@ export default function EmployeeListPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary">Employees</h1>
-          <p className="text-text-secondary mt-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Employees</h1>
+          <p className="text-text-secondary mt-1 text-sm sm:text-base">
             Manage employee information and documents
           </p>
         </div>
         {isHROrAdmin && (
           <button
             onClick={handleCreateNew}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <PlusIcon className="w-5 h-5" />
             Add Employee
@@ -141,7 +141,7 @@ export default function EmployeeListPage() {
               setSearch(e.target.value)
               setPage(1)
             }}
-            className="flex-1 bg-transparent outline-none text-text-primary placeholder-text-secondary"
+            className="flex-1 bg-transparent outline-none text-text-primary placeholder-text-secondary min-w-0"
           />
         </div>
       </div>
@@ -157,157 +157,227 @@ export default function EmployeeListPage() {
             <p className="text-text-secondary">No employees found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto overflow-y-visible">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-divider bg-surface">
-                  <th 
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('employee_id')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Employee ID</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('employee_id') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('employee_id') && (
-                        <span className="text-xs">{isSortedDesc('employee_id') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('user__first_name')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Name</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('user__first_name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('user__first_name') && (
-                        <span className="text-xs">{isSortedDesc('user__first_name') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('department')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Department</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('department') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('department') && (
-                        <span className="text-xs">{isSortedDesc('department') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('job_title')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Job Title</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('job_title') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('job_title') && (
-                        <span className="text-xs">{isSortedDesc('job_title') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('employment_status')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Status</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('employment_status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('employment_status') && (
-                        <span className="text-xs">{isSortedDesc('employment_status') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.results.map((employee: Employee) => (
-                  <tr
-                    key={employee.id}
-                    onClick={() => handleView(employee.id)}
-                    className="border-b border-divider hover:bg-surface transition-colors cursor-pointer"
-                  >
-                    <td className="px-6 py-4 text-sm text-text-primary font-medium">
-                      {employee.employee_id}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-primary">
-                      <div className="flex items-center gap-3">
-                        {employee.picture ? (
-                          <img
-                            src={employee.picture}
-                            alt={`${employee.user?.first_name} ${employee.user?.last_name}`}
-                            className="w-10 h-10 rounded-full object-cover border border-divider flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                            {employee.user?.first_name?.charAt(0)}{employee.user?.last_name?.charAt(0)}
-                          </div>
-                        )}
-                        <span>{employee.user?.first_name} {employee.user?.last_name}</span>
+          <>
+            {/* Mobile card list */}
+            <div className="md:hidden space-y-3">
+              {data.results.map((employee: Employee) => (
+                <div
+                  key={employee.id}
+                  onClick={() => handleView(employee.id)}
+                  className="border border-divider rounded-xl p-4 bg-white hover:bg-surface transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start gap-3">
+                    {employee.picture ? (
+                      <img
+                        src={employee.picture}
+                        alt={`${employee.user?.first_name} ${employee.user?.last_name}`}
+                        className="w-12 h-12 rounded-full object-cover border border-divider flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+                        {employee.user?.first_name?.charAt(0)}{employee.user?.last_name?.charAt(0)}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {employee.department}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {employee.job_title}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                          employee.employment_status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : employee.employment_status === 'terminated'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        {employee.employment_status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div>
-                        <button
-                          ref={(el) => {
-                            if (el) buttonRefs.current[employee.id] = el
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleMenuClick(employee.id, buttonRefs.current[employee.id])
-                          }}
-                          className="p-2 hover:bg-surface rounded-card transition-colors"
-                          title="More options"
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-surface text-text-secondary">
+                          {employee.employee_id}
+                        </span>
+                        <span
+                          className={`text-xs font-medium px-2 py-1 rounded-full ${
+                            employee.employment_status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : employee.employment_status === 'terminated'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
                         >
-                          <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
-                        </button>
+                          {employee.employment_status}
+                        </span>
                       </div>
-                    </td>
+                      <h3 className="mt-2 text-base font-semibold text-text-primary truncate">
+                        {employee.user?.first_name} {employee.user?.last_name}
+                      </h3>
+                      <p className="mt-1 text-sm text-text-secondary truncate">
+                        {employee.job_title}
+                      </p>
+                      {employee.department && (
+                        <p className="text-xs text-text-secondary mt-1">
+                          {employee.department.name}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      ref={(el) => {
+                        if (el) buttonRefs.current[employee.id] = el
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleMenuClick(employee.id, buttonRefs.current[employee.id])
+                      }}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+                      title="More options"
+                    >
+                      <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block table-container">
+              <table className="table-sticky-col">
+                <thead>
+                  <tr className="border-b border-divider bg-surface">
+                    <th 
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('employee_id')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Employee ID</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('employee_id') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('employee_id') && (
+                          <span className="text-xs">{isSortedDesc('employee_id') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('user__first_name')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Name</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('user__first_name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('user__first_name') && (
+                          <span className="text-xs">{isSortedDesc('user__first_name') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('department')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Department</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('department') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('department') && (
+                          <span className="text-xs">{isSortedDesc('department') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('job_title')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Job Title</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('job_title') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('job_title') && (
+                          <span className="text-xs">{isSortedDesc('job_title') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('employment_status')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Status</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('employment_status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('employment_status') && (
+                          <span className="text-xs">{isSortedDesc('employment_status') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {data.results.map((employee: Employee) => (
+                    <tr
+                      key={employee.id}
+                      onClick={() => handleView(employee.id)}
+                      className="border-b border-divider hover:bg-surface transition-colors cursor-pointer"
+                    >
+                      <td className="px-6 py-4 text-sm text-text-primary font-medium">
+                        {employee.employee_id}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-primary">
+                        <div className="flex items-center gap-3">
+                          {employee.picture ? (
+                            <img
+                              src={employee.picture}
+                              alt={`${employee.user?.first_name} ${employee.user?.last_name}`}
+                              className="w-10 h-10 rounded-full object-cover border border-divider flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                              {employee.user?.first_name?.charAt(0)}{employee.user?.last_name?.charAt(0)}
+                            </div>
+                          )}
+                          <span>{employee.user?.first_name} {employee.user?.last_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {employee.department?.name || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {employee.job_title}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            employee.employment_status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : employee.employment_status === 'terminated'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {employee.employment_status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div>
+                          <button
+                            ref={(el) => {
+                              if (el) buttonRefs.current[employee.id] = el
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleMenuClick(employee.id, buttonRefs.current[employee.id])
+                            }}
+                            className="p-2 hover:bg-surface rounded-card transition-colors"
+                            title="More options"
+                          >
+                            <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
       {/* Pagination */}
       {data && data.count > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-text-secondary">
             Showing {(page - 1) * 50 + 1} to {Math.min(page * 50, data.count)} of{' '}
             {data.count} employees
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-between sm:justify-end">
             <button
               onClick={() => setPage(page - 1)}
               disabled={!data.previous}
-              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors"
+              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors flex-1 sm:flex-none"
             >
               Previous
             </button>
@@ -315,7 +385,7 @@ export default function EmployeeListPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={!data.next}
-              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors"
+              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors flex-1 sm:flex-none"
             >
               Next
             </button>

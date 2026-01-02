@@ -103,3 +103,50 @@ export interface CountResponse {
   count: number;
 }
 
+// Client types
+export interface Client {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  address: string;
+  contact_person: string;
+  person_name: string;
+  email: string;
+  phone: string;
+  status: EntityStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Client[];
+}
+
+export interface CreateClientRequest {
+  code: string;
+  name: string;
+  description?: string;
+  address?: string;
+  contact_person?: string;
+  person_name?: string;
+  email?: string;
+  phone?: string;
+  status?: EntityStatus;
+}
+
+export interface UpdateClientRequest {
+  code?: string;
+  name?: string;
+  description?: string;
+  address?: string;
+  contact_person?: string;
+  person_name?: string;
+  email?: string;
+  phone?: string;
+  status?: EntityStatus;
+}
+

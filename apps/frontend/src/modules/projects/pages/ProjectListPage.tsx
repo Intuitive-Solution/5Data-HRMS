@@ -137,17 +137,17 @@ export default function ProjectListPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary">Projects</h1>
-          <p className="text-text-secondary mt-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Projects</h1>
+          <p className="text-text-secondary mt-1 text-sm sm:text-base">
             Manage projects and assignments
           </p>
         </div>
         {isAdmin && (
           <button
             onClick={handleCreateNew}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <PlusIcon className="w-5 h-5" />
             Add Project
@@ -167,19 +167,20 @@ export default function ProjectListPage() {
               setSearch(e.target.value)
               setPage(1)
             }}
-            className="flex-1 bg-transparent outline-none text-text-primary placeholder-text-secondary"
+            className="flex-1 bg-transparent outline-none text-text-primary placeholder-text-secondary min-w-0"
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-text-primary">Status:</label>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <label htmlFor="status-filter" className="text-sm font-medium text-text-primary">Status:</label>
           <select
+            id="status-filter"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value)
               setPage(1)
             }}
-            className="input-field flex-1 max-w-xs"
+            className="input-field flex-1 sm:max-w-xs"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -201,147 +202,203 @@ export default function ProjectListPage() {
             <p className="text-text-secondary">No projects found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto overflow-y-visible">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-divider bg-surface">
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('name')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Name</span>
-                      <ChevronUpDownIcon
-                        className={`w-4 h-4 ${isSorted('name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
-                      />
-                      {isSorted('name') && (
-                        <span className="text-xs">{isSortedDesc('name') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('client')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Client</span>
-                      <ChevronUpDownIcon
-                        className={`w-4 h-4 ${isSorted('client') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
-                      />
-                      {isSorted('client') && (
-                        <span className="text-xs">{isSortedDesc('client') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Billing Type
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('status')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Status</span>
-                      <ChevronUpDownIcon
-                        className={`w-4 h-4 ${isSorted('status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
-                      />
-                      {isSorted('status') && (
-                        <span className="text-xs">{isSortedDesc('status') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('start_date')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Start Date</span>
-                      <ChevronUpDownIcon
-                        className={`w-4 h-4 ${isSorted('start_date') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
-                      />
-                      {isSorted('start_date') && (
-                        <span className="text-xs">{isSortedDesc('start_date') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    End Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.results.map((project: Project) => (
-                  <tr
-                    key={project.id}
-                    onClick={() => handleView(project.id)}
-                    className="border-b border-divider hover:bg-surface transition-colors cursor-pointer"
-                  >
-                    <td className="px-6 py-4 text-sm text-text-primary font-medium">
-                      {project.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {project.client}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {getBillingTypeLabel(project.billing_type)}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(
-                          project.status
-                        )}`}
-                      >
-                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {new Date(project.start_date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {project.end_date
-                        ? new Date(project.end_date).toLocaleDateString()
-                        : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div>
-                        <button
-                          ref={(el) => {
-                            if (el) buttonRefs.current[project.id] = el
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleMenuClick(project.id, buttonRefs.current[project.id])
-                          }}
-                          className="p-2 hover:bg-surface rounded-card transition-colors"
-                          title="More options"
+          <>
+            {/* Mobile card list */}
+            <div className="md:hidden space-y-3">
+              {data.results.map((project: Project) => (
+                <div
+                  key={project.id}
+                  onClick={() => handleView(project.id)}
+                  className="border border-divider rounded-xl p-4 bg-white hover:bg-surface transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusBadgeColor(
+                            project.status
+                          )}`}
                         >
-                          <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
-                        </button>
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                        </span>
+                        <span className="text-xs text-text-secondary">
+                          {getBillingTypeLabel(project.billing_type)}
+                        </span>
                       </div>
-                    </td>
+                      <h3 className="mt-2 text-base font-semibold text-text-primary truncate">
+                        {project.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-text-secondary truncate">
+                        {project.client}
+                      </p>
+                    </div>
+                    <button
+                      ref={(el) => {
+                        if (el) buttonRefs.current[project.id] = el
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleMenuClick(project.id, buttonRefs.current[project.id])
+                      }}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+                      title="More options"
+                    >
+                      <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+                    </button>
+                  </div>
+                  <div className="mt-3 flex items-center gap-4 text-xs text-text-secondary">
+                    <span>Start: {new Date(project.start_date).toLocaleDateString()}</span>
+                    {project.end_date && (
+                      <span>End: {new Date(project.end_date).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block table-container">
+              <table className="table-sticky-col">
+                <thead>
+                  <tr className="border-b border-divider bg-surface">
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('name')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Name</span>
+                        <ChevronUpDownIcon
+                          className={`w-4 h-4 ${isSorted('name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
+                        />
+                        {isSorted('name') && (
+                          <span className="text-xs">{isSortedDesc('name') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('client')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Client</span>
+                        <ChevronUpDownIcon
+                          className={`w-4 h-4 ${isSorted('client') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
+                        />
+                        {isSorted('client') && (
+                          <span className="text-xs">{isSortedDesc('client') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
+                      Billing Type
+                    </th>
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('status')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Status</span>
+                        <ChevronUpDownIcon
+                          className={`w-4 h-4 ${isSorted('status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
+                        />
+                        {isSorted('status') && (
+                          <span className="text-xs">{isSortedDesc('status') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('start_date')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Start Date</span>
+                        <ChevronUpDownIcon
+                          className={`w-4 h-4 ${isSorted('start_date') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`}
+                        />
+                        {isSorted('start_date') && (
+                          <span className="text-xs">{isSortedDesc('start_date') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
+                      End Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {data.results.map((project: Project) => (
+                    <tr
+                      key={project.id}
+                      onClick={() => handleView(project.id)}
+                      className="border-b border-divider hover:bg-surface transition-colors cursor-pointer"
+                    >
+                      <td className="px-6 py-4 text-sm text-text-primary font-medium">
+                        {project.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {project.client}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {getBillingTypeLabel(project.billing_type)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(
+                            project.status
+                          )}`}
+                        >
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {new Date(project.start_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {project.end_date
+                          ? new Date(project.end_date).toLocaleDateString()
+                          : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div>
+                          <button
+                            ref={(el) => {
+                              if (el) buttonRefs.current[project.id] = el
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleMenuClick(project.id, buttonRefs.current[project.id])
+                            }}
+                            className="p-2 hover:bg-surface rounded-card transition-colors"
+                            title="More options"
+                          >
+                            <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
       {/* Pagination */}
       {data && data.count > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-text-secondary">
             Showing {(page - 1) * 50 + 1} to {Math.min(page * 50, data.count)} of{' '}
             {data.count} projects
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-between sm:justify-end">
             <button
               onClick={() => setPage(page - 1)}
               disabled={!data.previous}
-              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors"
+              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors flex-1 sm:flex-none"
             >
               Previous
             </button>
@@ -349,7 +406,7 @@ export default function ProjectListPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={!data.next}
-              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors"
+              className="px-4 py-2 border border-divider rounded-card disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors flex-1 sm:flex-none"
             >
               Next
             </button>

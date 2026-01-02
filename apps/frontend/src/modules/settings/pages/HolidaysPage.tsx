@@ -18,6 +18,21 @@ import {
   useDeleteHoliday,
 } from '../hooks/useSettings'
 import type { Holiday, CreateHolidayRequest } from '@5data-hrms/shared'
+import { useFormValidation, type FieldRules } from '@/utils/validation'
+
+const holidayValidationRules: FieldRules = {
+  name: [
+    { type: 'required', message: 'Holiday name is required' },
+    { type: 'minLength', value: 2, message: 'Name must be at least 2 characters' },
+  ],
+  date: [{ type: 'required', message: 'Date is required' }],
+}
+
+const initialFormData: CreateHolidayRequest = {
+  name: '',
+  date: '',
+  is_optional: false,
+}
 
 export default function HolidaysPage() {
   const navigate = useNavigate()
@@ -28,13 +43,18 @@ export default function HolidaysPage() {
   const [selectedYear, setSelectedYear] = useState(currentYear.toString())
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingHoliday, setEditingHoliday] = useState<Holiday | null>(null)
-  const [formData, setFormData] = useState<CreateHolidayRequest>({
-    name: '',
-    date: '',
-    is_optional: false,
-  })
-  const [formErrors, setFormErrors] = useState<{ name?: string; date?: string }>({})
   const [successMessage, setSuccessMessage] = useState('')
+
+  const {
+    data: formData,
+    errors: formErrors,
+    handleChange,
+    handleBlur,
+    validateAll,
+    resetForm,
+    setFormData,
+    getFieldProps,
+  } = useFormValidation<CreateHolidayRequest>(initialFormData, holidayValidationRules)
 
   const { data, isLoading, error } = useHolidays(page, search, ordering, selectedYear)
   const { data: yearsData } = useHolidayYears()
@@ -76,8 +96,7 @@ export default function HolidaysPage() {
 
   const openCreateModal = () => {
     setEditingHoliday(null)
-    setFormData({ name: '', date: '', is_optional: false })
-    setFormErrors({})
+    resetForm()
     setIsModalOpen(true)
   }
 
@@ -88,32 +107,18 @@ export default function HolidaysPage() {
       date: holiday.date,
       is_optional: holiday.is_optional,
     })
-    setFormErrors({})
     setIsModalOpen(true)
   }
 
   const closeModal = () => {
     setIsModalOpen(false)
     setEditingHoliday(null)
-    setFormData({ name: '', date: '', is_optional: false })
-    setFormErrors({})
-  }
-
-  const validateForm = (): boolean => {
-    const errors: { name?: string; date?: string } = {}
-    if (!formData.name.trim()) {
-      errors.name = 'Holiday name is required'
-    }
-    if (!formData.date) {
-      errors.date = 'Date is required'
-    }
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
+    resetForm()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validateForm()) return
+    if (!validateAll()) return
 
     try {
       if (editingHoliday) {
@@ -158,25 +163,25 @@ export default function HolidaysPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-4">
           <button
             onClick={() => navigate('/settings')}
-            className="p-2 hover:bg-surface rounded-lg transition-colors"
+            className="p-2 hover:bg-surface rounded-lg transition-colors mt-1"
             aria-label="Back to settings"
           >
             <ArrowLeftIcon className="w-5 h-5 text-text-secondary" />
           </button>
-          <div>
-            <h1 className="text-3xl font-bold text-text-primary">Holidays</h1>
-            <p className="text-text-secondary mt-1">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Holidays</h1>
+            <p className="text-text-secondary mt-1 text-sm sm:text-base">
               Manage company holidays
             </p>
           </div>
         </div>
         <button
           onClick={openCreateModal}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <PlusIcon className="w-5 h-5" />
           Add Holiday
@@ -256,66 +261,18 @@ export default function HolidaysPage() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-divider bg-surface">
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('name')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Name</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('name') && (
-                        <span className="text-xs text-primary">{isSortedDesc('name') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('date')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Date</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('date') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('date') && (
-                        <span className="text-xs text-primary">{isSortedDesc('date') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
-                    onClick={() => handleSort('is_optional')}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>Type</span>
-                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('is_optional') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
-                      {isSorted('is_optional') && (
-                        <span className="text-xs text-primary">{isSortedDesc('is_optional') ? '↓' : '↑'}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-text-primary">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.results.map((holiday) => (
-                  <tr
-                    key={holiday.id}
-                    className="border-b border-divider hover:bg-surface transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm text-text-primary font-medium">
-                      {holiday.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
-                      {formatDate(holiday.date)}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
+          <>
+            {/* Mobile card list */}
+            <div className="md:hidden space-y-3">
+              {data.results.map((holiday) => (
+                <div
+                  key={holiday.id}
+                  className="border border-divider rounded-xl p-4 bg-white hover:bg-surface transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                        className={`text-xs font-medium px-2 py-1 rounded-full ${
                           holiday.is_optional
                             ? 'bg-amber-100 text-amber-800'
                             : 'bg-green-100 text-green-800'
@@ -323,45 +280,142 @@ export default function HolidaysPage() {
                       >
                         {holiday.is_optional ? 'Optional' : 'Mandatory'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(holiday)}
-                          className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
-                          aria-label={`Edit ${holiday.name}`}
-                        >
-                          <PencilIcon className="w-4 h-4 text-primary" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(holiday)}
-                          className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                          aria-label={`Delete ${holiday.name}`}
-                        >
-                          <TrashIcon className="w-4 h-4 text-red-500" />
-                        </button>
+                      <h3 className="mt-2 text-base font-semibold text-text-primary truncate">
+                        {holiday.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-text-secondary">
+                        {formatDate(holiday.date)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => openEditModal(holiday)}
+                        className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                        aria-label={`Edit ${holiday.name}`}
+                      >
+                        <PencilIcon className="w-5 h-5 text-primary" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(holiday)}
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        aria-label={`Delete ${holiday.name}`}
+                      >
+                        <TrashIcon className="w-5 h-5 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block table-container">
+              <table className="table-sticky-col">
+                <thead>
+                  <tr className="border-b border-divider bg-surface">
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('name')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Name</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('name') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('name') && (
+                          <span className="text-xs text-primary">{isSortedDesc('name') ? '↓' : '↑'}</span>
+                        )}
                       </div>
-                    </td>
+                    </th>
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('date')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Date</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('date') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('date') && (
+                          <span className="text-xs text-primary">{isSortedDesc('date') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                      onClick={() => handleSort('is_optional')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>Type</span>
+                        <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('is_optional') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                        {isSorted('is_optional') && (
+                          <span className="text-xs text-primary">{isSortedDesc('is_optional') ? '↓' : '↑'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-text-primary">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {data.results.map((holiday) => (
+                    <tr
+                      key={holiday.id}
+                      className="border-b border-divider hover:bg-surface transition-colors"
+                    >
+                      <td className="px-6 py-4 text-sm text-text-primary font-medium">
+                        {holiday.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {formatDate(holiday.date)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            holiday.is_optional
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {holiday.is_optional ? 'Optional' : 'Mandatory'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => openEditModal(holiday)}
+                            className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                            aria-label={`Edit ${holiday.name}`}
+                          >
+                            <PencilIcon className="w-4 h-4 text-primary" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(holiday)}
+                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                            aria-label={`Delete ${holiday.name}`}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
       {/* Pagination */}
       {data && data.count > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-text-secondary">
             Showing {(page - 1) * 50 + 1} to {Math.min(page * 50, data.count)} of{' '}
             {data.count} holidays
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-between sm:justify-end">
             <button
               onClick={() => setPage(page - 1)}
               disabled={!data.previous}
-              className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors"
+              className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors flex-1 sm:flex-none"
             >
               Previous
             </button>
@@ -369,7 +423,7 @@ export default function HolidaysPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={!data.next}
-              className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors"
+              className="px-4 py-2 border border-divider rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface transition-colors flex-1 sm:flex-none"
             >
               Next
             </button>
@@ -405,13 +459,17 @@ export default function HolidaysPage() {
                   type="text"
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  onBlur={() => handleBlur('name')}
+                  {...getFieldProps('name')}
                   className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors
                     ${formErrors.name ? 'border-red-500' : 'border-divider focus:border-primary'}`}
                   placeholder="Enter holiday name"
                 />
                 {formErrors.name && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
+                  <p id="name-error" role="alert" className="mt-1 text-sm text-red-500">
+                    {formErrors.name}
+                  </p>
                 )}
               </div>
               <div>
@@ -425,12 +483,16 @@ export default function HolidaysPage() {
                   type="date"
                   id="date"
                   value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onChange={(e) => handleChange('date', e.target.value)}
+                  onBlur={() => handleBlur('date')}
+                  {...getFieldProps('date')}
                   className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors
                     ${formErrors.date ? 'border-red-500' : 'border-divider focus:border-primary'}`}
                 />
                 {formErrors.date && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.date}</p>
+                  <p id="date-error" role="alert" className="mt-1 text-sm text-red-500">
+                    {formErrors.date}
+                  </p>
                 )}
               </div>
               <div className="flex items-center gap-3">
@@ -438,9 +500,7 @@ export default function HolidaysPage() {
                   type="checkbox"
                   id="is_optional"
                   checked={formData.is_optional}
-                  onChange={(e) =>
-                    setFormData({ ...formData, is_optional: e.target.checked })
-                  }
+                  onChange={(e) => handleChange('is_optional', e.target.checked)}
                   className="w-5 h-5 rounded border-divider text-primary focus:ring-primary"
                 />
                 <label
