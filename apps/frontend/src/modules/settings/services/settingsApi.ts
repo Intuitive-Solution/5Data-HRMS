@@ -21,15 +21,18 @@ export const settingsApi = {
   // ==================== DEPARTMENTS ====================
 
   /**
-   * Get all departments with pagination and sorting
+   * Get all departments with pagination, sorting, and optional status filter
    */
-  getDepartments: (page = 1, search = '', ordering = '') => {
+  getDepartments: (page = 1, search = '', ordering = '', status = '') => {
     const params = new URLSearchParams({
       page: page.toString(),
       search,
     })
     if (ordering) {
       params.append('ordering', ordering)
+    }
+    if (status) {
+      params.append('status', status)
     }
     return api.get<DepartmentListResponse>(`${SETTINGS_BASE_URL}/departments/?${params}`)
   },
@@ -72,15 +75,18 @@ export const settingsApi = {
   // ==================== LOCATIONS ====================
 
   /**
-   * Get all locations with pagination and sorting
+   * Get all locations with pagination, sorting, and optional status filter
    */
-  getLocations: (page = 1, search = '', ordering = '') => {
+  getLocations: (page = 1, search = '', ordering = '', status = '') => {
     const params = new URLSearchParams({
       page: page.toString(),
       search,
     })
     if (ordering) {
       params.append('ordering', ordering)
+    }
+    if (status) {
+      params.append('status', status)
     }
     return api.get<LocationListResponse>(`${SETTINGS_BASE_URL}/locations/?${params}`)
   },

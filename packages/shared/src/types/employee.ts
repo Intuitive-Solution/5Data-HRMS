@@ -2,6 +2,8 @@
  * Employee Management Types
  */
 
+import type { Department, Location } from './settings';
+
 export type EmploymentType = 'full_time' | 'contract' | 'part_time' | 'intern';
 export type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say';
 export type EmploymentStatus = 'active' | 'inactive' | 'on_leave' | 'terminated';
@@ -57,9 +59,9 @@ export interface Employee {
   probation_policy?: string;
   reporting_manager?: ReportingManager;
   
-  // Work Info
-  department: string;
-  location?: string;
+  // Work Info - now using ForeignKey relations
+  department: Department | null;
+  location: Location | null;
   shift?: string;
   employment_type: EmploymentType;
   date_of_joining: string;
@@ -100,8 +102,9 @@ export interface CreateEmployeeRequest {
   job_title: string;
   probation_policy?: string;
   reporting_manager_id?: string;
-  department: string;
-  location?: string;
+  // Work Info - using ForeignKey IDs
+  department_id?: number;
+  location_id?: number;
   shift?: string;
   employment_type: EmploymentType;
   date_of_joining: string;
@@ -125,8 +128,9 @@ export interface UpdateEmployeeRequest {
   job_title?: string;
   probation_policy?: string;
   reporting_manager?: string;
-  department?: string;
-  location?: string;
+  // Work Info - using ForeignKey IDs
+  department_id?: number | null;
+  location_id?: number | null;
   shift?: string;
   employment_type?: EmploymentType;
   contract_end_date?: string;

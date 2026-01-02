@@ -10,7 +10,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Department
-        fields = ('id', 'name', 'description', 'created_at', 'updated_at')
+        fields = ('id', 'name', 'code', 'description', 'status', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
 
@@ -19,7 +19,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Location
-        fields = ('id', 'name', 'address', 'created_at', 'updated_at')
+        fields = ('id', 'name', 'code', 'address', 'status', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
 

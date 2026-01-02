@@ -16,7 +16,7 @@ import {
   useUpdateDepartment,
   useDeleteDepartment,
 } from '../hooks/useSettings'
-import type { Department, CreateDepartmentRequest } from '@5data-hrms/shared'
+import type { Department, CreateDepartmentRequest, EntityStatus } from '@5data-hrms/shared'
 
 export default function DepartmentsPage() {
   const navigate = useNavigate()
@@ -25,7 +25,12 @@ export default function DepartmentsPage() {
   const [ordering, setOrdering] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
-  const [formData, setFormData] = useState<CreateDepartmentRequest>({ name: '', description: '' })
+  const [formData, setFormData] = useState<CreateDepartmentRequest>({ 
+    name: '', 
+    code: '',
+    description: '',
+    status: 'active' as EntityStatus
+  })
   const [formErrors, setFormErrors] = useState<{ name?: string }>({})
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -55,14 +60,19 @@ export default function DepartmentsPage() {
 
   const openCreateModal = () => {
     setEditingDepartment(null)
-    setFormData({ name: '', description: '' })
+    setFormData({ name: '', code: '', description: '', status: 'active' })
     setFormErrors({})
     setIsModalOpen(true)
   }
 
   const openEditModal = (department: Department) => {
     setEditingDepartment(department)
-    setFormData({ name: department.name, description: department.description })
+    setFormData({ 
+      name: department.name, 
+      code: department.code || '',
+      description: department.description,
+      status: department.status || 'active'
+    })
     setFormErrors({})
     setIsModalOpen(true)
   }
@@ -70,7 +80,7 @@ export default function DepartmentsPage() {
   const closeModal = () => {
     setIsModalOpen(false)
     setEditingDepartment(null)
-    setFormData({ name: '', description: '' })
+    setFormData({ name: '', code: '', description: '', status: 'active' })
     setFormErrors({})
   }
 
@@ -208,8 +218,32 @@ export default function DepartmentsPage() {
                       )}
                     </div>
                   </th>
+                  <th
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('code')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Code</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('code') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('code') && (
+                        <span className="text-xs text-primary">{isSortedDesc('code') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
                     Description
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Status</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('status') && (
+                        <span className="text-xs text-primary">{isSortedDesc('status') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
                   <th
                     className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
@@ -238,7 +272,21 @@ export default function DepartmentsPage() {
                       {department.name}
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
+                      {department.code || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
                       {department.description || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                          department.status === 'active'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {department.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
                       {new Date(department.created_at).toLocaleDateString()}
@@ -335,6 +383,22 @@ export default function DepartmentsPage() {
               </div>
               <div>
                 <label
+                  htmlFor="code"
+                  className="block text-sm font-medium text-text-primary mb-2"
+                >
+                  Code
+                </label>
+                <input
+                  type="text"
+                  id="code"
+                  value={formData.code || ''}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  className="w-full px-4 py-3 border border-divider rounded-lg outline-none focus:border-primary transition-colors"
+                  placeholder="Enter department code (optional)"
+                />
+              </div>
+              <div>
+                <label
                   htmlFor="description"
                   className="block text-sm font-medium text-text-primary mb-2"
                 >
@@ -348,6 +412,23 @@ export default function DepartmentsPage() {
                   className="w-full px-4 py-3 border border-divider rounded-lg outline-none focus:border-primary transition-colors resize-none"
                   placeholder="Enter department description (optional)"
                 />
+              </div>
+              <div>
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-medium text-text-primary mb-2"
+                >
+                  Status
+                </label>
+                <select
+                  id="status"
+                  value={formData.status || 'active'}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as EntityStatus })}
+                  className="w-full px-4 py-3 border border-divider rounded-lg outline-none focus:border-primary transition-colors bg-white"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
               </div>
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button

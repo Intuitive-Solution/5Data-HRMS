@@ -24,12 +24,13 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['employee_id', 'user__email', 'user__first_name', 'user__last_name', 'department', 'job_title']
+    # Updated search_fields: department is now a ForeignKey, so search on department__name
+    search_fields = ['employee_id', 'user__email', 'user__first_name', 'user__last_name', 'department__name', 'job_title']
     ordering_fields = [
         'employee_id', 
         'user__first_name', 
         'user__last_name',
-        'department', 
+        'department__name',  # Updated for ForeignKey 
         'job_title',
         'employment_status',
         'date_of_joining',
@@ -56,6 +57,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create new employee with user account."""
+        from settings.models import Department, Location
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -67,17 +70,41 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             password='TempPassword123!'  # TODO: Send password reset link to user
         )
 
+        # Resolve department and location from IDs
+        department = None
+        location = None
+        dept_id = serializer.validated_data.get('department_id')
+        loc_id = serializer.validated_data.get('location_id')
+        
+        if dept_id:
+            try:
+                department = Department.objects.get(id=dept_id)
+            except Department.DoesNotExist:
+                pass
+        
+        if loc_id:
+            try:
+                location = Location.objects.get(id=loc_id)
+            except Location.DoesNotExist:
+                pass
+
+        # Exclude ForeignKey ID fields and user fields from remaining data
+        excluded_fields = [
+            'email', 'first_name', 'last_name', 'employee_id', 
+            'job_title', 'department_id', 'location_id', 'employment_type', 'date_of_joining'
+        ]
+        remaining_data = {k: v for k, v in serializer.validated_data.items() if k not in excluded_fields}
+
         # Create employee
         employee = Employee.objects.create(
             user=user,
             employee_id=serializer.validated_data['employee_id'],
             job_title=serializer.validated_data['job_title'],
-            department=serializer.validated_data['department'],
+            department=department,
+            location=location,
             employment_type=serializer.validated_data['employment_type'],
             date_of_joining=serializer.validated_data['date_of_joining'],
-            **{k: v for k, v in serializer.validated_data.items() 
-               if k not in ['email', 'first_name', 'last_name', 'employee_id', 
-                           'job_title', 'department', 'employment_type', 'date_of_joining']}
+            **remaining_data
         )
 
         # Log audit trail
@@ -90,14 +117,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         """Update employee with audit trail."""
         instance = self.get_object()
         
-        # Store original values for audit
+        # Store original values for audit (handle ForeignKey relationships)
         original_values = {}
         for field in ['middle_name', 'personal_email', 'phone_number', 'gender',
                      'address', 'date_of_birth', 'nationality', 'employment_status',
-                     'job_title', 'probation_policy', 'department', 'location',
-                     'shift', 'employment_type', 'contract_end_date',
-                     'contractor_company', 'termination_date', 'termination_reason']:
+                     'job_title', 'probation_policy', 'shift', 'employment_type',
+                     'contract_end_date', 'contractor_company', 'termination_date',
+                     'termination_reason']:
             original_values[field] = getattr(instance, field, None)
+        # Store ForeignKey IDs for audit
+        original_values['department_id'] = instance.department_id
+        original_values['location_id'] = instance.location_id
 
         serializer = self.get_serializer(instance, data=request.data, partial=kwargs.get('partial', False))
         serializer.is_valid(raise_exception=True)
@@ -106,7 +136,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         # Log audit trail
         AuditTrailMixin.log_update(request.user, instance, original_values, request)
 
-        return Response(serializer.data)
+        # Return full employee data with nested objects
+        response_serializer = EmployeeSerializer(instance)
+        return Response(response_serializer.data)
 
     @action(detail=False, methods=['get'])
     def me(self, request):

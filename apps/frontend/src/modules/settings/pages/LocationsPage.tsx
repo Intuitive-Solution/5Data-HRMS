@@ -16,7 +16,7 @@ import {
   useUpdateLocation,
   useDeleteLocation,
 } from '../hooks/useSettings'
-import type { Location, CreateLocationRequest } from '@5data-hrms/shared'
+import type { Location, CreateLocationRequest, EntityStatus } from '@5data-hrms/shared'
 
 export default function LocationsPage() {
   const navigate = useNavigate()
@@ -25,7 +25,12 @@ export default function LocationsPage() {
   const [ordering, setOrdering] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingLocation, setEditingLocation] = useState<Location | null>(null)
-  const [formData, setFormData] = useState<CreateLocationRequest>({ name: '', address: '' })
+  const [formData, setFormData] = useState<CreateLocationRequest>({ 
+    name: '', 
+    code: '',
+    address: '',
+    status: 'active' as EntityStatus
+  })
   const [formErrors, setFormErrors] = useState<{ name?: string }>({})
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -55,14 +60,19 @@ export default function LocationsPage() {
 
   const openCreateModal = () => {
     setEditingLocation(null)
-    setFormData({ name: '', address: '' })
+    setFormData({ name: '', code: '', address: '', status: 'active' })
     setFormErrors({})
     setIsModalOpen(true)
   }
 
   const openEditModal = (location: Location) => {
     setEditingLocation(location)
-    setFormData({ name: location.name, address: location.address })
+    setFormData({ 
+      name: location.name, 
+      code: location.code || '',
+      address: location.address,
+      status: location.status || 'active'
+    })
     setFormErrors({})
     setIsModalOpen(true)
   }
@@ -70,7 +80,7 @@ export default function LocationsPage() {
   const closeModal = () => {
     setIsModalOpen(false)
     setEditingLocation(null)
-    setFormData({ name: '', address: '' })
+    setFormData({ name: '', code: '', address: '', status: 'active' })
     setFormErrors({})
   }
 
@@ -208,8 +218,32 @@ export default function LocationsPage() {
                       )}
                     </div>
                   </th>
+                  <th
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('code')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Code</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('code') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('code') && (
+                        <span className="text-xs text-primary">{isSortedDesc('code') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-text-primary">
                     Address
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>Status</span>
+                      <ChevronUpDownIcon className={`w-4 h-4 ${isSorted('status') ? 'text-primary' : 'text-text-secondary opacity-0 group-hover:opacity-100'}`} />
+                      {isSorted('status') && (
+                        <span className="text-xs text-primary">{isSortedDesc('status') ? '↓' : '↑'}</span>
+                      )}
+                    </div>
                   </th>
                   <th
                     className="px-6 py-4 text-left text-sm font-semibold text-text-primary cursor-pointer hover:bg-gray-100 transition-colors group"
@@ -238,7 +272,21 @@ export default function LocationsPage() {
                       {location.name}
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
+                      {location.code || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
                       {location.address || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                          location.status === 'active'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {location.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
                       {new Date(location.created_at).toLocaleDateString()}
@@ -335,6 +383,22 @@ export default function LocationsPage() {
               </div>
               <div>
                 <label
+                  htmlFor="code"
+                  className="block text-sm font-medium text-text-primary mb-2"
+                >
+                  Code
+                </label>
+                <input
+                  type="text"
+                  id="code"
+                  value={formData.code || ''}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  className="w-full px-4 py-3 border border-divider rounded-lg outline-none focus:border-primary transition-colors"
+                  placeholder="Enter location code (optional)"
+                />
+              </div>
+              <div>
+                <label
                   htmlFor="address"
                   className="block text-sm font-medium text-text-primary mb-2"
                 >
@@ -348,6 +412,23 @@ export default function LocationsPage() {
                   className="w-full px-4 py-3 border border-divider rounded-lg outline-none focus:border-primary transition-colors resize-none"
                   placeholder="Enter location address (optional)"
                 />
+              </div>
+              <div>
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-medium text-text-primary mb-2"
+                >
+                  Status
+                </label>
+                <select
+                  id="status"
+                  value={formData.status || 'active'}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as EntityStatus })}
+                  className="w-full px-4 py-3 border border-divider rounded-lg outline-none focus:border-primary transition-colors bg-white"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
               </div>
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button

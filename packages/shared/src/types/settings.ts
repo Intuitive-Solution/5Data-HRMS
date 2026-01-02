@@ -2,11 +2,16 @@
  * Settings types for Departments, Locations, and Holidays.
  */
 
+// Status type for Department and Location
+export type EntityStatus = 'active' | 'inactive';
+
 // Department types
 export interface Department {
   id: string;
   name: string;
+  code: string;
   description: string;
+  status: EntityStatus;
   created_at: string;
   updated_at: string;
 }
@@ -20,19 +25,25 @@ export interface DepartmentListResponse {
 
 export interface CreateDepartmentRequest {
   name: string;
+  code?: string;
   description?: string;
+  status?: EntityStatus;
 }
 
 export interface UpdateDepartmentRequest {
   name?: string;
+  code?: string;
   description?: string;
+  status?: EntityStatus;
 }
 
 // Location types
 export interface Location {
   id: string;
   name: string;
+  code: string;
   address: string;
+  status: EntityStatus;
   created_at: string;
   updated_at: string;
 }
@@ -46,12 +57,16 @@ export interface LocationListResponse {
 
 export interface CreateLocationRequest {
   name: string;
+  code?: string;
   address?: string;
+  status?: EntityStatus;
 }
 
 export interface UpdateLocationRequest {
   name?: string;
+  code?: string;
   address?: string;
+  status?: EntityStatus;
 }
 
 // Holiday types

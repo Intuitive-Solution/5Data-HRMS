@@ -4,6 +4,7 @@ Employee serializers.
 from rest_framework import serializers
 from .models import Employee, EmployeeDocument
 from accounts.serializers import UserSerializer
+from settings.serializers import DepartmentSerializer, LocationSerializer
 
 
 class ReportingManagerSerializer(serializers.ModelSerializer):
@@ -34,6 +35,9 @@ class EmployeeSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     reporting_manager = ReportingManagerSerializer(read_only=True)
     documents = EmployeeDocumentSerializer(read_only=True, many=True)
+    # Nested serializers for department and location (read-only)
+    department = DepartmentSerializer(read_only=True)
+    location = LocationSerializer(read_only=True)
 
     class Meta:
         model = Employee
@@ -82,9 +86,9 @@ class CreateEmployeeSerializer(serializers.Serializer):
     probation_policy = serializers.CharField(max_length=100, required=False, allow_blank=True)
     reporting_manager_id = serializers.IntegerField(required=False, allow_null=True)
     
-    # Work Info
-    department = serializers.CharField(max_length=100)
-    location = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    # Work Info - now using ForeignKey IDs
+    department_id = serializers.IntegerField(required=False, allow_null=True)
+    location_id = serializers.IntegerField(required=False, allow_null=True)
     shift = serializers.CharField(max_length=50, required=False, allow_blank=True)
     employment_type = serializers.ChoiceField(
         choices=['full_time', 'contract', 'part_time', 'intern']
@@ -98,6 +102,10 @@ class CreateEmployeeSerializer(serializers.Serializer):
 
 class UpdateEmployeeSerializer(serializers.ModelSerializer):
     """Update employee serializer."""
+    # Accept department_id and location_id for write operations
+    department_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
+    location_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
+
     class Meta:
         model = Employee
         fields = (
@@ -110,9 +118,37 @@ class UpdateEmployeeSerializer(serializers.ModelSerializer):
             # Job Info
             'job_title', 'probation_policy', 'reporting_manager',
             # Work Info
-            'department', 'location', 'shift', 'employment_type',
+            'department_id', 'location_id', 'shift', 'employment_type',
             'contract_end_date', 'contractor_company',
             'termination_date', 'termination_reason'
         )
         read_only_fields = ('user', 'date_of_joining')
+
+    def update(self, instance, validated_data):
+        """Handle department_id and location_id for ForeignKey updates."""
+        from settings.models import Department, Location
+        
+        # Handle department_id
+        if 'department_id' in validated_data:
+            dept_id = validated_data.pop('department_id')
+            if dept_id is not None:
+                try:
+                    instance.department = Department.objects.get(id=dept_id)
+                except Department.DoesNotExist:
+                    instance.department = None
+            else:
+                instance.department = None
+        
+        # Handle location_id
+        if 'location_id' in validated_data:
+            loc_id = validated_data.pop('location_id')
+            if loc_id is not None:
+                try:
+                    instance.location = Location.objects.get(id=loc_id)
+                except Location.DoesNotExist:
+                    instance.location = None
+            else:
+                instance.location = None
+        
+        return super().update(instance, validated_data)
 

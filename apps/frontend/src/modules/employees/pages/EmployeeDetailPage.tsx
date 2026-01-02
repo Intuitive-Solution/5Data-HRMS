@@ -117,7 +117,7 @@ export default function EmployeeDetailPage() {
             </div>
             <div>
               <p className="text-text-secondary text-sm">Department</p>
-              <p className="text-text-primary font-medium">{employee.department}</p>
+              <p className="text-text-primary font-medium">{employee.department?.name || 'N/A'}</p>
             </div>
             <div>
               <p className="text-text-secondary text-sm">Date of Joining</p>

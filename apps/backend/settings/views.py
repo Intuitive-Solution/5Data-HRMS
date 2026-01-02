@@ -21,9 +21,17 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'description']
-    ordering_fields = ['name', 'created_at']
+    search_fields = ['name', 'code', 'description']
+    ordering_fields = ['name', 'code', 'status', 'created_at']
     ordering = ['name']
+
+    def get_queryset(self):
+        """Filter departments by status if provided."""
+        queryset = super().get_queryset()
+        status_filter = self.request.query_params.get('status')
+        if status_filter and status_filter in ['active', 'inactive']:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
 
     @action(detail=False, methods=['get'])
     def count(self, request):
@@ -45,9 +53,17 @@ class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'address']
-    ordering_fields = ['name', 'created_at']
+    search_fields = ['name', 'code', 'address']
+    ordering_fields = ['name', 'code', 'status', 'created_at']
     ordering = ['name']
+
+    def get_queryset(self):
+        """Filter locations by status if provided."""
+        queryset = super().get_queryset()
+        status_filter = self.request.query_params.get('status')
+        if status_filter and status_filter in ['active', 'inactive']:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
 
     @action(detail=False, methods=['get'])
     def count(self, request):

@@ -58,8 +58,21 @@ class Employee(SoftDeleteModel):
     )
 
     # Work Info Fields
-    department = models.CharField(max_length=100)
-    location = models.CharField(max_length=100, blank=True)
+    # ForeignKey to Department and Location models for proper relations
+    department = models.ForeignKey(
+        'settings.Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='employees'
+    )
+    location = models.ForeignKey(
+        'settings.Location',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='employees'
+    )
     shift = models.CharField(max_length=50, blank=True)
     employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES)
     date_of_joining = models.DateField()
@@ -72,7 +85,6 @@ class Employee(SoftDeleteModel):
         ordering = ['employee_id']
         indexes = [
             models.Index(fields=['employee_id']),
-            models.Index(fields=['department']),
             models.Index(fields=['employment_status']),
         ]
 

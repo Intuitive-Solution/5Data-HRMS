@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { EmployeeDetail, UpdateEmployeeRequest } from '@5data-hrms/shared'
+import { useActiveDepartments, useActiveLocations } from '@/modules/settings/hooks/useSettings'
 
 interface WorkInfoTabProps {
   employee: EmployeeDetail
@@ -14,9 +15,14 @@ export default function WorkInfoTab({
   onSave,
   canEdit,
 }: WorkInfoTabProps) {
+  // Fetch active departments and locations for dropdowns
+  const { data: departmentsData, isLoading: isDepartmentsLoading } = useActiveDepartments()
+  const { data: locationsData, isLoading: isLocationsLoading } = useActiveLocations()
+
+  // Form state uses department_id and location_id for ForeignKey references
   const [formData, setFormData] = useState({
-    department: employee.department || '',
-    location: employee.location || '',
+    department_id: employee.department?.id ? Number(employee.department.id) : null,
+    location_id: employee.location?.id ? Number(employee.location.id) : null,
     shift: employee.shift || '',
     employment_type: employee.employment_type || '',
     contract_end_date: employee.contract_end_date || '',
@@ -27,14 +33,23 @@ export default function WorkInfoTab({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    
+    // Handle numeric IDs for department and location
+    if (name === 'department_id' || name === 'location_id') {
+      setFormData((prev) => ({ 
+        ...prev, 
+        [name]: value ? Number(value) : null 
+      }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSave({
-      department: formData.department,
-      location: formData.location,
+      department_id: formData.department_id,
+      location_id: formData.location_id,
       shift: formData.shift,
       employment_type: (formData.employment_type as any),
       contract_end_date: formData.contract_end_date || undefined,
@@ -48,33 +63,52 @@ export default function WorkInfoTab({
     return (
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-6">
-          {/* Department */}
+          {/* Department Dropdown */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-2">
               Department
             </label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              required
-              className="input-field"
-            />
+            {isDepartmentsLoading ? (
+              <div className="input-field bg-gray-50 text-text-secondary">Loading departments...</div>
+            ) : (
+              <select
+                name="department_id"
+                value={formData.department_id || ''}
+                onChange={handleChange}
+                className="input-field"
+              >
+                <option value="">Select Department</option>
+                {departmentsData?.results?.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
-          {/* Location */}
+          {/* Location Dropdown */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-2">
               Location
             </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="input-field"
-            />
+            {isLocationsLoading ? (
+              <div className="input-field bg-gray-50 text-text-secondary">Loading locations...</div>
+            ) : (
+              <select
+                name="location_id"
+                value={formData.location_id || ''}
+                onChange={handleChange}
+                className="input-field"
+              >
+                <option value="">Select Location</option>
+                {locationsData?.results?.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Shift */}
@@ -185,11 +219,15 @@ export default function WorkInfoTab({
     <div className="grid grid-cols-2 gap-6">
       <div>
         <p className="text-text-secondary text-sm">Department</p>
-        <p className="text-text-primary font-medium">{employee.department}</p>
+        <p className="text-text-primary font-medium">
+          {employee.department?.name || 'N/A'}
+        </p>
       </div>
       <div>
         <p className="text-text-secondary text-sm">Location</p>
-        <p className="text-text-primary font-medium">{employee.location || 'N/A'}</p>
+        <p className="text-text-primary font-medium">
+          {employee.location?.name || 'N/A'}
+        </p>
       </div>
       <div>
         <p className="text-text-secondary text-sm">Shift</p>
@@ -234,4 +272,3 @@ export default function WorkInfoTab({
     </div>
   )
 }
-

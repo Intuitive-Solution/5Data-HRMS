@@ -94,6 +94,18 @@ export const useDeleteDepartment = () => {
   })
 }
 
+/**
+ * Hook to fetch only active departments for dropdowns
+ * Fetches all active departments (page size 1000 to get all in one request)
+ */
+export const useActiveDepartments = () => {
+  return useQuery({
+    queryKey: [DEPARTMENTS_KEY, 'active'],
+    queryFn: () => settingsApi.getDepartments(1, '', 'name', 'active').then(res => res.data),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
 // ==================== LOCATIONS ====================
 
 /**
@@ -171,6 +183,18 @@ export const useDeleteLocation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [LOCATIONS_KEY] })
     },
+  })
+}
+
+/**
+ * Hook to fetch only active locations for dropdowns
+ * Fetches all active locations (page size 1000 to get all in one request)
+ */
+export const useActiveLocations = () => {
+  return useQuery({
+    queryKey: [LOCATIONS_KEY, 'active'],
+    queryFn: () => settingsApi.getLocations(1, '', 'name', 'active').then(res => res.data),
+    staleTime: 5 * 60 * 1000,
   })
 }
 
