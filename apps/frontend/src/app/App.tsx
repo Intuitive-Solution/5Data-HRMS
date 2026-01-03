@@ -23,6 +23,7 @@ import TimesheetListPage from '@/modules/timesheets/pages/TimesheetListPage'
 import TimesheetPage from '@/modules/timesheets/pages/TimesheetPage'
 import TeamTimesheetsPage from '@/modules/timesheets/pages/TeamTimesheetsPage'
 import LeaveListPage from '@/modules/leaves/pages/LeaveListPage'
+import DocumentListPage from '@/modules/documents/pages/DocumentListPage'
 import SettingsDashboard from '@/modules/settings/pages/SettingsDashboard'
 import DepartmentsPage from '@/modules/settings/pages/DepartmentsPage'
 import LocationsPage from '@/modules/settings/pages/LocationsPage'
@@ -102,6 +103,9 @@ export default function App() {
 
           {/* Leave Routes */}
           <Route path="/leaves" element={<LeaveListPage />} />
+
+          {/* Document Routes */}
+          <Route path="/documents" element={<DocumentListPage />} />
 
           {/* Settings Routes */}
           <Route path="/settings" element={<SettingsDashboard />} />

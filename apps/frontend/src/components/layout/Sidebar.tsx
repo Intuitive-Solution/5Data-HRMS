@@ -8,15 +8,14 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   FolderIcon,
+  DocumentTextIcon,
   DocumentChartBarIcon,
   Cog6ToothIcon,
   Bars3Icon,
   XMarkIcon,
-  ArrowLeftOnRectangleIcon,
   UserCircleIcon,
   CheckBadgeIcon,
 } from "@heroicons/react/24/outline";
-import { logout } from "@/store/slices/authSlice";
 import { STORAGE_KEYS } from "@5data-hrms/shared";
 import type { RootState } from "@/store";
 
@@ -34,19 +33,6 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const handleLogout = () => {
-    // Clear localStorage tokens
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    
-    // Clear Redux state
-    dispatch(logout());
-    
-    // Redirect to login
-    navigate("/login");
-  };
-
   // Format role for display
   const formatRole = (role: string) => {
     return role
@@ -61,13 +47,9 @@ export default function Sidebar() {
     { name: "Leaves", href: "/leaves", icon: CalendarDaysIcon },
     { name: "Timesheets", href: "/timesheets", icon: ClockIcon },
     { name: "Projects", href: "/projects", icon: FolderIcon },
+    { name: "Documents", href: "/documents", icon: DocumentTextIcon },
     { name: "Reports", href: "/reports", icon: DocumentChartBarIcon },
     { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
-    {
-      name: "Logout",
-      icon: ArrowLeftOnRectangleIcon,
-      action: handleLogout,
-    },
   ];
 
   return (
@@ -325,20 +307,6 @@ export default function Sidebar() {
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* Logout Button */}
-            <div className="px-6 pb-8">
-              <button
-                onClick={() => {
-                  setProfileOpen(false);
-                  handleLogout();
-                }}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-2xl transition-colors"
-              >
-                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-                <span>Sign Out</span>
-              </button>
             </div>
           </div>
         </>

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'reports',
     'audit',
     'settings',
+    'documents',
 ]
 
 MIDDLEWARE = [
