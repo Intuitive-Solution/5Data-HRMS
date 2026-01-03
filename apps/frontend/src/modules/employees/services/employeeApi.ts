@@ -65,9 +65,9 @@ export const employeeApi = {
     if (data.probation_policy) formData.append('probation_policy', data.probation_policy)
     if (data.reporting_manager_id) formData.append('reporting_manager_id', data.reporting_manager_id)
     
-    // Work Info
-    formData.append('department', data.department)
-    if (data.location) formData.append('location', data.location)
+    // Work Info - use department_id and location_id for ForeignKey references
+    if (data.department_id !== undefined && data.department_id !== null) formData.append('department_id', String(data.department_id))
+    if (data.location_id !== undefined && data.location_id !== null) formData.append('location_id', String(data.location_id))
     if (data.shift) formData.append('shift', data.shift)
     formData.append('employment_type', data.employment_type)
     formData.append('date_of_joining', data.date_of_joining)
@@ -105,9 +105,9 @@ export const employeeApi = {
     if (data.probation_policy !== undefined) formData.append('probation_policy', data.probation_policy || '')
     if (data.reporting_manager !== undefined) formData.append('reporting_manager', data.reporting_manager || '')
     
-    // Work Info
-    if (data.department !== undefined) formData.append('department', data.department || '')
-    if (data.location !== undefined) formData.append('location', data.location || '')
+    // Work Info - use department_id and location_id for ForeignKey references
+    if (data.department_id !== undefined) formData.append('department_id', data.department_id !== null ? String(data.department_id) : '')
+    if (data.location_id !== undefined) formData.append('location_id', data.location_id !== null ? String(data.location_id) : '')
     if (data.shift !== undefined) formData.append('shift', data.shift || '')
     if (data.employment_type !== undefined) formData.append('employment_type', data.employment_type || '')
     if (data.contract_end_date !== undefined) formData.append('contract_end_date', data.contract_end_date || '')
