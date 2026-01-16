@@ -2,9 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
-
-import { exportEmployeesToExcel } from '@/utils/exportEmployees'
-
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -27,13 +24,6 @@ export default function EmployeeListPage() {
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null)
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   const menuRef = useRef<HTMLDivElement>(null)
-
-  //Export Handler
-  const handleExport = () => {
-  if (!data?.results?.length) return
-  exportEmployeesToExcel(data.results)
-}
-
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -129,25 +119,14 @@ export default function EmployeeListPage() {
           </p>
         </div>
         {isHROrAdmin && (
-  <div className="flex gap-3 w-full sm:w-auto">
-    <button
-      onClick={handleExport}
-      className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
-      disabled={!data?.results?.length}
-    >
-      Export
-    </button>
-
-    <button
-      onClick={handleCreateNew}
-      className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
-    >
-      <PlusIcon className="w-5 h-5" />
-      Add Employee
-    </button>
-  </div>
-)}
-
+          <button
+            onClick={handleCreateNew}
+            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Add Employee
+          </button>
+        )}
       </div>
 
       {/* Search Bar */}
