@@ -14,9 +14,6 @@ import {
 import { useProjects, useDeleteProject } from '../hooks/useProjects'
 import type { Project } from '@5data-hrms/shared'
 
-import { exportProjectAssignmentsToExcel } from '@/utils/exportProjectAssignments'
-
-
 export default function ProjectListPage() {
   const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.auth)
@@ -148,14 +145,6 @@ export default function ProjectListPage() {
           </p>
         </div>
         {isAdmin && (
-          <div className="flex gap-3 w-full sm:w-auto">
-            <button
-              onClick={() => exportProjectAssignmentsToExcel()}
-              className="btn-secondary"
-            >
-              Export
-            </button>
-
           <button
             onClick={handleCreateNew}
             className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
@@ -163,7 +152,6 @@ export default function ProjectListPage() {
             <PlusIcon className="w-5 h-5" />
             Add Project
           </button>
-          </div>
         )}
       </div>
 
