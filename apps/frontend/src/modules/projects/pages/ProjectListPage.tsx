@@ -15,6 +15,9 @@ import { useProjects, useDeleteProject } from '../hooks/useProjects'
 import type { Project } from '@5data-hrms/shared'
 
 import { exportProjectAssignmentsToExcel } from '@/utils/exportProjectAssignments'
+import * as XLSX from 'xlsx'
+import { importProjectsFromExcel } from '@/utils/importProjectsFromExcel'
+import { useCreateProject } from '../hooks/useProjects'
 
 
 export default function ProjectListPage() {
@@ -137,6 +140,34 @@ export default function ProjectListPage() {
     )
   }
 
+  const createProjectMutation = useCreateProject()
+
+const handleProjectFileChange = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  console.log('PROJECT FILE SELECTED:', file.name)
+
+  const buffer = await file.arrayBuffer()
+
+  const workbook = XLSX.read(buffer, { type: 'array' })
+  const sheetName = workbook.SheetNames[0]
+  const sheet = workbook.Sheets[sheetName]
+
+  const rows = XLSX.utils.sheet_to_json(sheet, {
+    defval: '',
+    raw: false,
+  })
+
+  console.log('PARSED PROJECT ROWS:', rows)
+
+  await importProjectsFromExcel(rows, createProjectMutation)
+
+  e.target.value = ''
+}
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -149,6 +180,21 @@ export default function ProjectListPage() {
         </div>
         {isAdmin && (
           <div className="flex gap-3 w-full sm:w-auto">
+
+        <label
+          htmlFor="project-upload"
+          className="btn-secondary cursor-pointer"
+        >
+          Import Projects
+          <input
+            id="project-upload"
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleProjectFileChange}
+            className="hidden"
+          />
+        </label>
+
             <button
               onClick={() => exportProjectAssignmentsToExcel()}
               className="btn-secondary"

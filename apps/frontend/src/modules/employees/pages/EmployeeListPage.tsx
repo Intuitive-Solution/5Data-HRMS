@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
 
+import * as XLSX from 'xlsx'
+import { useCreateEmployee } from "../hooks/useEmployees"
 import { exportEmployeesToExcel } from '@/utils/exportEmployees'
+import {importEmployeesFromExcel} from '@/utils/importEmployeesFromExcel'
+
+
 
 import {
   MagnifyingGlassIcon,
@@ -118,6 +123,35 @@ export default function EmployeeListPage() {
     )
   }
 
+  const createEmployeeMutation = useCreateEmployee()
+
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    console.log('FILE SELECTED:', file.name)
+    // Step 1: Read file
+    const buffer = await file.arrayBuffer()
+
+    // Step 2: Parse Excel
+    const workbook = XLSX.read(buffer, { type: 'array' })
+    const sheetName = workbook.SheetNames[0]
+    const sheet = workbook.Sheets[sheetName]
+
+    // Step 3: Convert to JSON
+    const rows = XLSX.utils.sheet_to_json(sheet, {
+      defval: '',
+      raw: false,
+    })
+    console.log('PARSED ROWS:', rows)
+    // Step 4: Import rows
+    await importEmployeesFromExcel(rows, createEmployeeMutation)
+
+    // Reset input
+    e.target.value = ''
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -128,26 +162,50 @@ export default function EmployeeListPage() {
             Manage employee information and documents
           </p>
         </div>
-        {isHROrAdmin && (
-  <div className="flex gap-3 w-full sm:w-auto">
+      {isHROrAdmin && (
+  <div className="flex flex-wrap items-center gap-3">
+    {/* File Input */}
+      <label 
+        htmlFor="file-upload" 
+        className="btn-secondary flex items-center justify-center gap-2 cursor-pointer"
+      >
+        Import Employees
+        <input
+          id="file-upload"
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </label>
+
+
+      {/* <input
+        type="file"
+        accept=".xlsx,.xls"
+        onChange={handleFileChange}
+      /> */}
+
+
+    {/* Export Button */}
     <button
       onClick={handleExport}
-      className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
+      className="btn-secondary flex items-center justify-center gap-2"
       disabled={!data?.results?.length}
     >
       Export
     </button>
 
+    {/* Add Employee Button */}
     <button
       onClick={handleCreateNew}
-      className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
+      className="btn-primary flex items-center justify-center gap-2"
     >
       <PlusIcon className="w-5 h-5" />
       Add Employee
     </button>
   </div>
 )}
-
       </div>
 
       {/* Search Bar */}
